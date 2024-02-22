@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ru-RU">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Тестирование ЯОКПБ</title>
+</head>
+<body>
+    <form action="" method="post">
+        <h1>Вопрос №1</h1>
+        <h2>{{.Question}}</h2>
+        <ol>
+            {{range $i, $o := .Options}}
+            <li>
+                <div>
+                    <label for="answer_{{$i}}">
+                     <input type="radio" name="answer_{{$i}}"
+                        id="option_{{$i}}" value="{{$i}}"> {{$o}}
+                    </label>
+                </div>
+            </li>
+            {{end}}
+        </ol>
+        <button type="submit">Далее</button>
+    </form>
+</body>
+</html>
