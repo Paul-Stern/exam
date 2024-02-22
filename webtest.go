@@ -19,22 +19,14 @@ var testCard = Card{
 var templates = template.Must(template.ParseFiles("card.html"))
 
 func main() {
-	// fmt.Println(testCard)
 	http.HandleFunc("/", makeHandler(viewHandler))
-
 	log.Fatal(http.ListenAndServe(":***REMOVED***", nil))
 }
 
-func loadCard(c Card) *Card {
-	return &c
-}
-
 func viewHandler(w http.ResponseWriter, r *http.Request, c Card) {
-	// data := loadCard(c)
 	renderTemplate(w, "card", &c)
 	r.ParseForm()
 	vals := r.Form
-	// v := r.FormValue("body")
 	log.Println(vals)
 }
 
