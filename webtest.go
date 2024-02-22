@@ -20,6 +20,7 @@ var templates = template.Must(template.ParseFiles("card.html"))
 
 func main() {
 	http.HandleFunc("/", makeHandler(viewHandler))
+	log.Println("Server started. Listening to localhost:***REMOVED***")
 	log.Fatal(http.ListenAndServe(":***REMOVED***", nil))
 }
 
