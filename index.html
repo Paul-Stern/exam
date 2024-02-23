@@ -38,13 +38,20 @@
             return boxes.find(isCurrent)
         }
         const goNext = function() {
-            const boxList = getBoxList();
-            const currentBox = getCurrentBox();
-            const vals = Array.from(currentBox.getAttribute("class").split(" "));
+            let boxes = Array.from(document.getElementsByClassName("js-box"));
+            const currentBox = boxes.find(isCurrent)
+            const currentIndex = boxes.findIndex(isCurrent)
+            let vals = Array.from(currentBox.getAttribute("class").split(" "));
             currentBox.setAttribute(
                 "class",
                 vals.filter((val) => val === "js-current").join(" ") + " d-none"
             );
+            const nextBox = boxes[currentIndex + 1]
+            vals = Array.from(nextBox.getAttribute("class").split(" "));
+            nextBox.setAttribute(
+                "class",
+                vals.filter((val) => val !== "d-none").join(" ") + " js-current"
+            )
         }
         function isCurrent(box) {
             return box.getAttribute("class").includes("js-current");
