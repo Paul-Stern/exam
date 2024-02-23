@@ -30,13 +30,6 @@
         </div>
     </div>
     <script>
-        const getBoxList = function() {
-           return document.getElementsByClassName("js-box");
-        };
-        const getCurrentBox = function() {
-            const boxes = Array.from(getBoxList());
-            return boxes.find(isCurrent)
-        }
         const getAttrVals = function(box) {
             return Array.from(box.getAttribute("class").split(" "));
         }
@@ -78,11 +71,6 @@
         }
         function isCurrent(box) {
             return box.getAttribute("class").includes("js-current");
-        }
-        function removeDnone(str) {
-            const valList = str.split(" ");
-            const result = valList.filter((val) => val != "d-none");
-            return result;
         }
         document.getElementById("js-btn-next").addEventListener("click", goNext)
         document.getElementById("js-btn-back").addEventListener("click", goBack)
