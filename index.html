@@ -37,21 +37,44 @@
             const boxes = Array.from(getBoxList());
             return boxes.find(isCurrent)
         }
+        const getAttrVals = function(box) {
+            return Array.from(box.getAttribute("class").split(" "));
+        }
         const goNext = function() {
-            let boxes = Array.from(document.getElementsByClassName("js-box"));
+            const boxes = Array.from(document.getElementsByClassName("js-box"));
             const currentBox = boxes.find(isCurrent)
             const currentIndex = boxes.findIndex(isCurrent)
-            let vals = Array.from(currentBox.getAttribute("class").split(" "));
-            currentBox.setAttribute(
-                "class",
-                vals.filter((val) => val === "js-current").join(" ") + " d-none"
-            );
-            const nextBox = boxes[currentIndex + 1]
-            vals = Array.from(nextBox.getAttribute("class").split(" "));
-            nextBox.setAttribute(
-                "class",
-                vals.filter((val) => val !== "d-none").join(" ") + " js-current"
-            )
+            if (currentIndex < boxes.length - 1) {
+                let vals = getAttrVals(currentBox);
+                currentBox.setAttribute(
+                    "class",
+                    vals.filter((val) => val !== "js-current").join(" ") + " d-none"
+                );
+                const nextBox = boxes[currentIndex + 1]
+                vals = getAttrVals(nextBox);
+                nextBox.setAttribute(
+                    "class",
+                    vals.filter((val) => val !== "d-none").join(" ") + " js-current"
+                )
+            }
+        }
+        const goBack = function() {
+            const boxes = Array.from(document.getElementsByClassName("js-box"));
+            const currentBox = boxes.find(isCurrent)
+            const currentIndex = boxes.findIndex(isCurrent)
+            if (currentIndex > 0) {
+                let vals = getAttrVals(currentBox);
+                currentBox.setAttribute(
+                    "class",
+                    vals.filter((val) => val !== "js-current").join(" ") + " d-none"
+                );
+                const prevBox = boxes[currentIndex - 1]
+                vals = getAttrVals(prevBox);
+                prevBox.setAttribute(
+                    "class",
+                    vals.filter((val) => val !== "d-none").join(" ") + " js-current"
+                )
+            }
         }
         function isCurrent(box) {
             return box.getAttribute("class").includes("js-current");
@@ -62,6 +85,7 @@
             return result;
         }
         document.getElementById("js-btn-next").addEventListener("click", goNext)
+        document.getElementById("js-btn-back").addEventListener("click", goBack)
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
