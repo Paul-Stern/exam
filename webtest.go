@@ -11,9 +11,22 @@ type Card struct {
 	Options  []string
 }
 
+type test []Card
+
 var testCard = Card{
 	Question: "Что есть оториноларинголог?",
 	Options:  []string{"Ухо-горло-нос", "Печень-желчь-кишка", "Глаза-язык-легкие"},
+}
+
+var testOne = test{
+	Card{
+		Question: "Что есть оториноларинголог?",
+		Options:  []string{"Ухо-горло-нос", "Печень-желчь-кишка", "Глаза-язык-легкие"},
+	},
+	Card{
+		Question: "Какой глаз ведущий у правши?",
+		Options:  []string{"Левый", "Правый", "Срений (третий)"},
+	},
 }
 
 var templates = template.Must(template.ParseFiles("card.html"))
@@ -33,7 +46,9 @@ func viewHandler(w http.ResponseWriter, r *http.Request, c Card) {
 
 func makeHandler(fn func(http.ResponseWriter, *http.Request, Card)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		fn(w, r, testCard)
+		for _, c := range testOne {
+			fn(w, r, c)
+		}
 	}
 }
 
