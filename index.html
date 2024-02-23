@@ -40,9 +40,16 @@
         }
         const changeProgress = function(boxes, currentIndex) {
             const bar = document.getElementById("progress-bar");
-            const max = boxes.length;
-            const percent = (currentIndex + 1) / max * 100;
+            const max = boxes.length - 1;
+            const percent = currentIndex / max * 100;
             bar.setAttribute("style", `width: ${percent}%`)
+        }
+        const initProgress = function() {
+            const boxes = Array.from(document.getElementsByClassName("js-box"));
+            changeProgress(
+                boxes,
+                boxes.findIndex(isCurrent)
+            )
         }
         const goNext = function() {
             const boxes = Array.from(document.getElementsByClassName("js-box"));
@@ -129,6 +136,7 @@
         function isCurrent(box) {
             return box.getAttribute("class").includes("js-current");
         }
+        document.addEventListener("DOMContentLoaded", initProgress);
         document.getElementById("js-btn-next").addEventListener("click", goNext)
         document.getElementById("js-btn-back").addEventListener("click", goBack)
     </script>
