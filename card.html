@@ -17,9 +17,9 @@
         <ol>
             {{range $i, $o := .Options}}
             <li>
-                <div>
-                    <label for="answer_{{$i}}">
-                     <input type="radio" name="answer"
+                <div class="form-check">
+                    <label class="form-check-label" for="answer_{{$i}}">
+                     <input class="form-check-input" type="radio" name="answer"
                         id="option_{{$i}}" value="{{$i}}"> {{$o}}
                     </label>
                 </div>
