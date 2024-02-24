@@ -13,7 +13,7 @@
     <div class="progress" role="progressbar"
         aria-label="test-progress" aria-valuenow="0"
         aria-valuemin="0" aria-valuemax="55">
-        <div class="progress-bar" style="width: 0"></div>
+        <div id="progress-bar" class="progress-bar" style="width: 0"></div>
     </div>
     <div class="container">
     <form action="" method="post">
@@ -36,9 +36,9 @@
         </div>
         {{end}}
         <div class="row fixed-bottom">
-            <button id="js-btn-back" class="col btn btn-primary btn-lg invisible">Назад</button>
-            <button id="js-btn-next" class="col btn btn-primary btn-lg">Вперед</button>
-            <button id="js-btn-done" class="col btn btn-success btn-lg d-none" type="submit">Готово</button>
+            <button id="js-btn-back" type="button" class="col btn btn-primary btn-lg invisible">Назад</button>
+            <button id="js-btn-next" type="button" class="col btn btn-primary btn-lg">Вперед</button>
+            <button id="js-btn-done" type="submit" class="col btn btn-success btn-lg d-none">Готово</button>
         </div>
     </form>
     </div>
