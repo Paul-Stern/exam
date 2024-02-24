@@ -51,27 +51,34 @@
                 boxes.findIndex(isCurrent)
             )
         }
+        const hideBox = function(box) {
+            const vals = getAttrVals(box);
+            box.setAttribute(
+                "class",
+                vals.filter((val) => val !== "js-current").join(" ") + " d-none"
+            );
+        }
+        const showBox = function(box) {
+            vals = getAttrVals(box);
+            box.setAttribute(
+                "class",
+                vals.filter((val) => val !== "d-none").join(" ") + " js-current"
+            );
+        }
         const goNext = function() {
             const boxes = Array.from(document.getElementsByClassName("js-box"));
             const currentBox = boxes.find(isCurrent)
             const currentIndex = boxes.findIndex(isCurrent)
             if (currentIndex < boxes.length - 1) {
                 // Hide current box
-                let vals = getAttrVals(currentBox);
-                currentBox.setAttribute(
-                    "class",
-                    vals.filter((val) => val !== "js-current").join(" ") + " d-none"
-                );
+                hideBox(currentBox);
                 // Show next box and make it current
                 const nextBox = boxes[currentIndex + 1]
-                vals = getAttrVals(nextBox);
-                nextBox.setAttribute(
-                    "class",
-                    vals.filter((val) => val !== "d-none").join(" ") + " js-current"
-                );
+                showBox(nextBox);
+                // Change progress
                 changeProgress(boxes, currentIndex + 1)
             }
-            if (currentIndex == 0) {
+            if (currentIndex === 0) {
                 // Hide back button
                 const backBtn = document.getElementById("js-btn-back");
                 const vals = getAttrVals(backBtn);
@@ -82,10 +89,12 @@
             }
             if (currentIndex === boxes.length - 2) {
                 // Replace next button with done button
+                // Hide next button
                 const nextBtn = document.getElementById("js-btn-next");
                 let vals = getAttrVals(nextBtn);
                 nextBtn.setAttribute("class", vals.join(" ") + " d-none");
 
+                // Show done button
                 const doneBtn = document.getElementById("js-btn-done");
                 vals = getAttrVals(doneBtn);
                 doneBtn.setAttribute(
@@ -99,21 +108,14 @@
             const currentBox = boxes.find(isCurrent)
             const currentIndex = boxes.findIndex(isCurrent)
             if (currentIndex > 0) {
+                // Hide current box
+                hideBox(currentBox);
                 // Show previous box
-                let vals = getAttrVals(currentBox);
-                currentBox.setAttribute(
-                    "class",
-                    vals.filter((val) => val !== "js-current").join(" ") + " d-none"
-                );
                 const prevBox = boxes[currentIndex - 1]
-                vals = getAttrVals(prevBox);
-                prevBox.setAttribute(
-                    "class",
-                    vals.filter((val) => val !== "d-none").join(" ") + " js-current"
-                )
-                changeProgress(boxes, currentIndex - 1)
+                showBox(prevBox);
+                changeProgress(boxes, currentIndex - 1);
             }
-            if (currentIndex == 1) {
+            if (currentIndex === 1) {
                 // Hide back button
                 const backBtn = document.getElementById("js-btn-back");
                 const vals = getAttrVals(backBtn);
@@ -121,10 +123,12 @@
             }
             if (currentIndex < boxes.length) {
                 // Replace done button with next button
+                // Hide done button
                 const doneBtn = document.getElementById("js-btn-done");
                 let vals = getAttrVals(doneBtn);
                 doneBtn.setAttribute("class", vals.join(" ") + " d-none");
 
+                // Show next button
                 const nextBtn = document.getElementById("js-btn-next");
                 vals = getAttrVals(nextBtn);
                 nextBtn.setAttribute(
