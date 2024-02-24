@@ -11,11 +11,29 @@ type Card struct {
 	Options  []string
 }
 
+type User struct {
+	id         int
+	name       string
+	middlename string
+	surname    string
+	email      string
+}
+
+type Users []User
+
 type Test []Card
 
 var cardOne = Card{
 	Question: "Что есть оториноларинголог?",
 	Options:  []string{"Ухо-горло-нос", "Печень-желчь-кишка", "Глаза-язык-легкие"},
+}
+
+var userOne = User{
+	id:         1,
+	name:       "Евгений",
+	middlename: "Семенович",
+	surname:    "Коновалов",
+	email:      "konoval@example.com",
 }
 
 var testOne = Test{
