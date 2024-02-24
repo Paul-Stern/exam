@@ -34,14 +34,36 @@ var cardOne = Card{
 	Options:  []string{"Ухо-горло-нос", "Печень-желчь-кишка", "Глаза-язык-легкие"},
 }
 
-var userOne = User{
-	id:         1,
-	name:       "Евгений",
-	middlename: "Семенович",
-	surname:    "Коновалов",
-	auth: Credentials{
-		email:    ***REMOVED***,
-		password: ***REMOVED***,
+var users = Users{
+	User{
+		id:         1,
+		name:       "Евгений",
+		middlename: "Семенович",
+		surname:    "Коновалов",
+		auth: Credentials{
+			email:    ***REMOVED***,
+			password: ***REMOVED***,
+		},
+	},
+	User{
+		id:         2,
+		name:       "Юлиан",
+		middlename: "Петрович",
+		surname:    "Костоправ",
+		auth: Credentials{
+			email:    ***REMOVED***,
+			password: ***REMOVED***,
+		},
+	},
+	User{
+		id:         3,
+		name:       "Герман",
+		middlename: "Станиславович",
+		surname:    "Кривонос",
+		auth: Credentials{
+			email:    ***REMOVED***,
+			password: ***REMOVED***,
+		},
 	},
 }
 
