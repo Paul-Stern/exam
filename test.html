@@ -14,7 +14,7 @@
         <div id="progress-bar" class="progress-bar" style="width: 0"></div>
     </div>
     <div class="container">
-    <form action="" method="post">
+    <form action="/test" method="post">
         {{range $i, $card := .}}
         <div class="js-card{{if eq $i 0}} js-current{{else}} d-none{{end}}">
             <h1>Вопрос №{{$i}}</h1>
@@ -25,7 +25,7 @@
                 <li>
                     <div class="form-check">
                         <label class="form-check-label" for="answer_{{$j}}">
-                        <input class="form-check-input" type="radio" name="answer"
+                        <input class="form-check-input" type="radio" name="answer_{{$i}}"
                             id="option_{{$j}}" value="{{$j}}"> {{$o}}
                         </label>
                     </div>

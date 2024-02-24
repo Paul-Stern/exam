@@ -11,12 +11,17 @@ type Card struct {
 	Options  []string
 }
 
+type Credentials struct {
+	email    string
+	password string
+}
+
 type User struct {
 	id         int
 	name       string
 	middlename string
 	surname    string
-	email      string
+	auth       Credentials
 }
 
 type Users []User
@@ -33,7 +38,10 @@ var userOne = User{
 	name:       "Евгений",
 	middlename: "Семенович",
 	surname:    "Коновалов",
-	email:      "konoval@example.com",
+	auth: Credentials{
+		email:    "konoval@example.com",
+		password: ***REMOVED***,
+	},
 }
 
 var testOne = Test{
@@ -47,16 +55,43 @@ var testOne = Test{
 var templates = template.Must(template.ParseFiles("test.html"))
 
 func main() {
-	http.HandleFunc("/", makeHandler(viewHandler))
+	http.HandleFunc("/test", makeHandler(viewHandler))
+	http.HandleFunc("/login", signInHandler)
 	log.Println("Server started. Listening to localhost:***REMOVED***")
 	log.Fatal(http.ListenAndServe(":***REMOVED***", nil))
 }
 
 func viewHandler(w http.ResponseWriter, r *http.Request, t Test) {
-	renderTemplate(w, "test", &t)
-	r.ParseForm()
-	vals := r.Form
-	log.Println(vals)
+	switch r.Method {
+	case "GET":
+		renderTemplate(w, "test", &t)
+	case "POST":
+		if err := r.ParseForm(); err != nil {
+			log.Printf("ParseForm() err: %v", err)
+			return
+		}
+		f := r.PostForm
+		log.Println(f)
+		http.Redirect(w, r, "/login", http.StatusFound)
+	}
+}
+
+func signInHandler(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "GET":
+		http.ServeFile(w, r, "login.html")
+	case "POST":
+		if err := r.ParseForm(); err != nil {
+			log.Printf("ParseForm() err: %v", err)
+			return
+		}
+		f := r.PostForm
+		log.Printf("%T: %s", f, f)
+		for n, v := range f {
+			log.Printf("%s: %s", n, v)
+		}
+		http.Redirect(w, r, "/test", http.StatusFound)
+	}
 }
 
 func makeHandler(fn func(http.ResponseWriter, *http.Request, Test)) http.HandlerFunc {
