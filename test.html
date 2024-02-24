@@ -10,9 +10,7 @@
             crossorigin="anonymous">
 </head>
 <body>
-    <div class="progress" role="progressbar"
-        aria-label="test-progress" aria-valuenow="0"
-        aria-valuemin="0" aria-valuemax="55">
+    <div class="progress" role="progressbar">
         <div id="progress-bar" class="progress-bar" style="width: 0"></div>
     </div>
     <div class="container">
@@ -23,6 +21,7 @@
             <h2>{{$card.Question}}</h2>
             <ol>
                 {{range $j, $o := $card.Options}}
+                <h5>
                 <li>
                     <div class="form-check">
                         <label class="form-check-label" for="answer_{{$j}}">
@@ -31,6 +30,7 @@
                         </label>
                     </div>
                 </li>
+                </h5>
                 {{end}}
             </ol>
         </div>
