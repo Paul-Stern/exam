@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -15,8 +17,8 @@ type Card struct {
 }
 
 type Credentials struct {
-	email    string
-	password string
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 type session struct {
@@ -50,8 +52,8 @@ var users = Users{
 		middlename: "Семенович",
 		surname:    "Коновалов",
 		auth: Credentials{
-			email:    ***REMOVED***,
-			password: ***REMOVED***,
+			Email:    ***REMOVED***,
+			Password: ***REMOVED***,
 		},
 	},
 	User{
@@ -60,8 +62,8 @@ var users = Users{
 		middlename: "Петрович",
 		surname:    "Костоправ",
 		auth: Credentials{
-			email:    ***REMOVED***,
-			password: ***REMOVED***,
+			Email:    ***REMOVED***,
+			Password: ***REMOVED***,
 		},
 	},
 	User{
@@ -70,8 +72,8 @@ var users = Users{
 		middlename: "Станиславович",
 		surname:    "Кривонос",
 		auth: Credentials{
-			email:    ***REMOVED***,
-			password: ***REMOVED***,
+			Email:    ***REMOVED***,
+			Password: ***REMOVED***,
 		},
 	},
 }
@@ -89,8 +91,18 @@ var templates = template.Must(template.ParseFiles("test.html"))
 func main() {
 	http.HandleFunc("/test", makeHandler(viewHandler))
 	http.HandleFunc("/login", signInHandler)
+	http.HandleFunc("/json", jsonHandler)
 	log.Println("Server started. Listening to localhost:***REMOVED***")
 	log.Fatal(http.ListenAndServe(":***REMOVED***", nil))
+}
+
+func jsonHandler(w http.ResponseWriter, r *http.Request) {
+	data, err := json.Marshal(users[1].auth)
+	if err != nil {
+		log.Printf("Json error: %v", err)
+	}
+	w.Header().Add("Content-type", "application/json")
+	fmt.Fprintf(w, "%s", data)
 }
 
 func viewHandler(w http.ResponseWriter, r *http.Request, t Test) {
@@ -119,7 +131,7 @@ func signInHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		f := r.PostForm
 		c := readCreds(f)
-		u, err := getUserByEmail(c.email)
+		u, err := getUserByEmail(c.Email)
 		if err != nil {
 			log.Printf("getUserByEmail() err: %v", err)
 			http.Redirect(w, r, "/login", http.StatusFound)
@@ -137,8 +149,8 @@ func signInHandler(w http.ResponseWriter, r *http.Request) {
 
 func readCreds(f url.Values) Credentials {
 	return Credentials{
-		email:    f["email"][0],
-		password: f["password"][0],
+		Email:    f["email"][0],
+		Password: f["password"][0],
 	}
 }
 
@@ -152,7 +164,7 @@ func getUserById(id int) User {
 
 func getUserByEmail(e string) (user User, err error) {
 	for _, u := range users {
-		if e == u.auth.email {
+		if e == u.auth.Email {
 			return u, nil
 		}
 	}
