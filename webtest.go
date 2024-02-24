@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"net/url"
 )
 
 type Card struct {
@@ -39,7 +40,7 @@ var userOne = User{
 	middlename: "Семенович",
 	surname:    "Коновалов",
 	auth: Credentials{
-		email:    "konoval@example.com",
+		email:    ***REMOVED***,
 		password: ***REMOVED***,
 	},
 }
@@ -90,8 +91,25 @@ func signInHandler(w http.ResponseWriter, r *http.Request) {
 		for n, v := range f {
 			log.Printf("%s: %s", n, v)
 		}
-		http.Redirect(w, r, "/test", http.StatusFound)
+		c := readCreds(f)
+		uc := getUserCreds()
+		log.Println(c, uc)
+		if c == uc {
+			http.Redirect(w, r, "/test", http.StatusFound)
+		}
+		http.Redirect(w, r, "/login", http.StatusFound)
 	}
+}
+
+func readCreds(f url.Values) Credentials {
+	return Credentials{
+		email:    f["email"][0],
+		password: f["password"][0],
+	}
+}
+
+func getUserCreds() Credentials {
+	return userOne.auth
 }
 
 func makeHandler(fn func(http.ResponseWriter, *http.Request, Test)) http.HandlerFunc {
