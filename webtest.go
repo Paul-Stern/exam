@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type Card struct {
@@ -38,7 +40,10 @@ type User struct {
 
 type Users []User
 
-type Test []Card
+type Test struct {
+	User  string
+	Cards []Card
+}
 
 var cardOne = Card{
 	Question: "Что есть оториноларинголог?",
@@ -79,10 +84,13 @@ var users = Users{
 }
 
 var testOne = Test{
-	cardOne,
-	Card{
-		Question: "Какой глаз ведущий у правши?",
-		Options:  []string{"Левый", "Правый", "Средний (третий)"},
+	User: getFullName(getUserById(1)),
+	Cards: []Card{
+		cardOne,
+		Card{
+			Question: "Какой глаз ведущий у правши?",
+			Options:  []string{"Левый", "Правый", "Средний (третий)"},
+		},
 	},
 }
 
@@ -94,6 +102,19 @@ func main() {
 	http.HandleFunc("/json", jsonHandler)
 	log.Println("Server started. Listening to localhost:***REMOVED***")
 	log.Fatal(http.ListenAndServe(":***REMOVED***", nil))
+}
+
+func newTest(u User) Test {
+	return Test{
+		User: getFullName(u),
+		Cards: []Card{
+			cardOne,
+			Card{
+				Question: "Какой глаз ведущий у правши?",
+				Options:  []string{"Левый", "Правый", "Средний (третий)"},
+			},
+		},
+	}
 }
 
 func jsonHandler(w http.ResponseWriter, r *http.Request) {
@@ -137,7 +158,14 @@ func signInHandler(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, "/login", http.StatusFound)
 		}
 		if c == u.auth {
-			log.Println("Login: succes. Redirecting...")
+			sessionToken := uuid.NewString()
+			expiresAt := time.Now().Add(2 * time.Hour)
+
+			sessions[sessionToken] = session{
+				email:  c.Email,
+				expiry: expiresAt,
+			}
+			log.Println("Login: success. Redirecting...")
 			http.Redirect(w, r, "/test", http.StatusFound)
 		} else {
 			err = errors.New("wrong password")
@@ -162,6 +190,10 @@ func getUserById(id int) User {
 	return users[id-1]
 }
 
+func getFullName(u User) string {
+	return fmt.Sprintf("%s %s %s", u.surname, u.name, u.middlename)
+}
+
 func getUserByEmail(e string) (user User, err error) {
 	for _, u := range users {
 		if e == u.auth.Email {
@@ -174,7 +206,15 @@ func getUserByEmail(e string) (user User, err error) {
 
 func makeHandler(fn func(http.ResponseWriter, *http.Request, Test)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		fn(w, r, testOne)
+		var t Test
+		for _, s := range sessions {
+			u, err := getUserByEmail(s.email)
+			if err != nil {
+				log.Printf("Get current user error: %v", err)
+			}
+			t = newTest(u)
+		}
+		fn(w, r, t)
 	}
 }
 

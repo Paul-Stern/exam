@@ -15,9 +15,9 @@
     </div>
     <div class="container">
         <h3 class="text-secondary">Тестирование по теме "Общая эрудиция"</h3>
-        <h6 class="text-secondary">Работник: Коновал Евгений Семенович</h6>
+        <h6 class="text-secondary">Работник: {{.User}}</h6>
     <form action="/test" method="post">
-        {{range $i, $card := .}}
+        {{range $i, $card := .Cards}}
         <div class="js-card{{if eq $i 0}} js-current{{else}} d-none{{end}}">
             <h1>Вопрос №{{$i}}</h1>
             <h2>{{$card.Question}}</h2>
