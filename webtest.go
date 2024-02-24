@@ -1,10 +1,12 @@
 package main
 
 import (
+	"errors"
 	"html/template"
 	"log"
 	"net/http"
 	"net/url"
+	"time"
 )
 
 type Card struct {
@@ -16,6 +18,13 @@ type Credentials struct {
 	email    string
 	password string
 }
+
+type session struct {
+	email  string
+	expiry time.Time
+}
+
+var sessions = map[string]session{}
 
 type User struct {
 	id         int
@@ -109,17 +118,20 @@ func signInHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		f := r.PostForm
-		log.Printf("%T: %s", f, f)
-		for n, v := range f {
-			log.Printf("%s: %s", n, v)
-		}
 		c := readCreds(f)
-		uc := getUserCreds()
-		log.Println(c, uc)
-		if c == uc {
-			http.Redirect(w, r, "/test", http.StatusFound)
+		u, err := getUserByEmail(c.email)
+		if err != nil {
+			log.Printf("getUserByEmail() err: %v", err)
+			http.Redirect(w, r, "/login", http.StatusFound)
 		}
-		http.Redirect(w, r, "/login", http.StatusFound)
+		if c == u.auth {
+			log.Println("Login: succes. Redirecting...")
+			http.Redirect(w, r, "/test", http.StatusFound)
+		} else {
+			err = errors.New("wrong password")
+			log.Printf("Login: %v\n", err)
+			http.Redirect(w, r, "/login", http.StatusFound)
+		}
 	}
 }
 
@@ -130,8 +142,22 @@ func readCreds(f url.Values) Credentials {
 	}
 }
 
-func getUserCreds() Credentials {
-	return userOne.auth
+func getUserCreds(id int) Credentials {
+	return users[id-1].auth
+}
+
+func getUserById(id int) User {
+	return users[id-1]
+}
+
+func getUserByEmail(e string) (user User, err error) {
+	for _, u := range users {
+		if e == u.auth.email {
+			return u, nil
+		}
+	}
+	err = errors.New("User not found")
+	return User{}, err
 }
 
 func makeHandler(fn func(http.ResponseWriter, *http.Request, Test)) http.HandlerFunc {
