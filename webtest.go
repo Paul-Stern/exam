@@ -10,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -29,6 +30,23 @@ type Card struct {
 type Credentials struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
+}
+
+type Answer int
+
+type Result struct {
+	QuestionId string   `json:"questionId"`
+	AnswerIds  []string `json:"answersIds"`
+}
+
+type TestResult struct {
+	UserId  int      `json:"userId"`
+	Results []Result `json:"results"`
+}
+
+type CardsResult []struct {
+	QuestionId int   `json:"QuestionId"`
+	AnswerIds  []int `json:"AnswerId"`
 }
 
 type session struct {
@@ -78,6 +96,7 @@ const (
 	getUrl       = "http://***REMOVED***:***REMOVED******REMOVED******REMOVED***
 	urlQuestGet  = "http://***REMOVED***:***REMOVED******REMOVED******REMOVED***"
 	urlQuestPost = "http://***REMOVED***:***REMOVED******REMOVED******REMOVED***"
+	urlPostRes   = "http://***REMOVED***:***REMOVED***/post"
 )
 
 var users = Users{
@@ -148,6 +167,24 @@ func newCard(id int, question string, opts []Option) Card {
 
 }
 
+func newCardsResult(vals url.Values) TestResult {
+	var tr TestResult
+	tr.UserId = 1
+	for k := range vals {
+		var r Result
+		// cr[k] = vals[k]
+		qId, _ := strings.CutPrefix(k, "question_")
+		var aIds []string
+		for _, aId := range vals[k] {
+			aIds = append(aIds, aId)
+		}
+		r.QuestionId = qId
+		r.AnswerIds = aIds
+		tr.Results = append(tr.Results, r)
+	}
+	return tr
+}
+
 func getData(url string) (m message, err error) {
 	resp, err := http.Get(url)
 	if err != nil {
@@ -165,13 +202,13 @@ func getData(url string) (m message, err error) {
 	return message{}, err
 }
 
-func getPostJson(c Credentials) (j message) {
+func getPostJson(c Credentials, url string) (j message) {
 	out, err := json.Marshal(c)
 	if err != nil {
 		log.Fatalf("post error: %v", err)
 	}
 	resp, err := http.Post(
-		urlQuestPost,
+		url,
 		"application/json",
 		bytes.NewBuffer(out),
 	)
@@ -185,9 +222,26 @@ func getPostJson(c Credentials) (j message) {
 	}
 	return got
 }
+func sendPostJson(r CardsResult, url string) *http.Response {
+	j, err := json.Marshal(r)
+	if err != nil {
+		log.Printf("sendPostJson error: %v", err)
+	}
+	res, err := http.Post(
+		url,
+		"application/json",
+		bytes.NewBuffer(j),
+	)
+	if err != nil {
+		log.Printf("sendPostJson error: %v", err)
+	}
+	log.Println("success")
+
+	return res
+}
 
 func getRestBlock(c Credentials) (rbs restBlocks) {
-	got := getPostJson(c)
+	got := getPostJson(c, urlQuestPost)
 	err := json.Unmarshal(got, &rbs)
 	if err != nil {
 		log.Fatalf("getRestBlock error: %v", err)
@@ -239,14 +293,26 @@ func viewHandler(w http.ResponseWriter, r *http.Request, t Test) {
 			return
 		}
 		f := r.PostForm
-		log.Println(f)
-		http.Redirect(w, r, "/login", http.StatusFound)
+		log.Printf("%s", f)
+		// cr := newCardResult(f)
+		// w.Header().Add("Content-Type", "application/json")
+		j, err := json.Marshal(newCardsResult(f))
+		log.Printf("%s", j)
+		if err != nil {
+			log.Printf("post error: %v", err)
+		}
+		w.Header().Add("Content-Type", "application/json")
+		fmt.Fprintf(w, "%s", j)
+
+		// log.Println(f)
+		// http.Redirect(w, r, "/login", http.StatusFound)
 	}
 }
 func postHandler(w http.ResponseWriter, r *http.Request) {
-	j := getPostJson(getUserCreds(1))
+	// j := getPostJson(getUserCreds(1))
+	b := r.Body
 	w.Header().Add("Content-Type", "application/json")
-	fmt.Fprintf(w, "%s", j)
+	fmt.Fprintf(w, "%s", b)
 
 }
 
