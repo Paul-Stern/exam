@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -145,6 +146,7 @@ func main() {
 	http.HandleFunc("/login", signInHandler)
 	http.HandleFunc("/json", jsonHandler)
 	http.HandleFunc("/req", reqHandler)
+	http.HandleFunc("/post", postHandler)
 	log.Println("Server started. Listening to localhost:***REMOVED***")
 	log.Fatal(http.ListenAndServe(":***REMOVED***", nil))
 }
@@ -239,7 +241,8 @@ func getCards() []Card {
 	}
 	return cards
 }
-*/
+
+
 
 func getCards() []Card {
 	var rbs restBlocks
@@ -267,7 +270,51 @@ func getCards() []Card {
 	}
 	return cards
 }
+*/
 
+func getPostJson(c Credentials) (j message) {
+	out, err := json.Marshal(c)
+	if err != nil {
+		log.Fatalf("post error: %v", err)
+	}
+	resp, err := http.Post(
+		urlQuestPost,
+		"application/json",
+		bytes.NewBuffer(out),
+	)
+	// Read body
+	got, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalf("post error: %v", err)
+	}
+	return got
+}
+
+func getRestBlock(c Credentials) (rbs restBlocks) {
+	got := getPostJson(c)
+	err := json.Unmarshal(got, &rbs)
+	if err != nil {
+		log.Fatalf("getRestBlock error: %v", err)
+	}
+	return rbs
+}
+
+func getCards(rbs restBlocks) (cards []Card) {
+	var c Card
+	for _, block := range rbs {
+		c.Id = block.Id
+		c.Question = block.Task_text
+		c.Options = []Option{}
+		for _, o := range block.Answers {
+			c.Options = append(
+				c.Options,
+				newOption(o.Id, o.Answer_text),
+			)
+		}
+		cards = append(cards, c)
+	}
+	return cards
+}
 func reqHandler(w http.ResponseWriter, r *http.Request) {
 	data, err := getData(urlQuestGet)
 	if err != nil {
@@ -299,6 +346,13 @@ func viewHandler(w http.ResponseWriter, r *http.Request, t Test) {
 		log.Println(f)
 		http.Redirect(w, r, "/login", http.StatusFound)
 	}
+}
+func postHandler(w http.ResponseWriter, r *http.Request) {
+	// rbs := getRestBlock(getUserById(1).auth)
+	j := getPostJson(getUserCreds(1))
+	w.Header().Add("Content-Type", "application/json")
+	fmt.Fprintf(w, "%s", j)
+
 }
 
 func signInHandler(w http.ResponseWriter, r *http.Request) {
@@ -409,12 +463,12 @@ func getUserByEmail(e string) (user User, err error) {
 func makeHandler(fn func(http.ResponseWriter, *http.Request, Test)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var t Test
-		c := getCards()
 		for _, s := range sessions {
 			u, err := getUserByEmail(s.email)
 			if err != nil {
 				log.Printf("Get current user error: %v", err)
 			}
+			c := getCards(getRestBlock(u.auth))
 			t = newTest(u, c)
 		}
 		// t = newTest(
