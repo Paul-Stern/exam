@@ -19,7 +19,7 @@
     <form action="/test" method="post">
         {{range $i, $card := .Cards}}
         <div class="js-card{{if eq $i 0}} js-current{{else}} d-none{{end}}">
-            <h1>Вопрос №{{$i}}</h1>
+            <h1>Вопрос №{{$card.Id}}</h1>
             <h2>{{$card.Question}}</h2>
             <ol>
                 {{range $j, $o := $card.Options}}
@@ -27,8 +27,8 @@
                 <li>
                     <div class="form-check">
                         <label class="form-check-label" for="answer_{{$j}}">
-                        <input class="form-check-input" type="radio" name="answer_{{$i}}"
-                            id="option_{{$j}}" value="{{$j}}"> {{$o}}
+                        <input class="form-check-input" type="radio" name="answer_{{$card.Id}}"
+                            id="option_{{$o.Id}}" value="{{$j}}"> {{$o.Text}}
                         </label>
                     </div>
                 </li>

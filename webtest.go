@@ -11,13 +11,17 @@ import (
 	"net/http"
 	"net/url"
 	"time"
-
-	"github.com/google/uuid"
 )
 
+type Option struct {
+	Id   int
+	Text string
+}
+
 type Card struct {
+	Id       int
 	Question string
-	Options  []string
+	Options  []Option
 }
 
 type Credentials struct {
@@ -31,6 +35,25 @@ type session struct {
 }
 
 type message []byte
+
+//	type restBlock struct {
+//		id             int    `json:"id"`
+//		task_text      string `json:"task_text"`
+//		task_answer_id int    `json:"task_answer_id"`
+//		answer_text    string `json:"answer_text"`
+//	}
+type restBlock struct {
+	Id        int       `json:"ID"`
+	Task_text string    `json:"TASK_TEXT"`
+	Answers   []restOpt `json:"ANSWERS"`
+}
+
+type restOpt struct {
+	Id          int    `json:"ID"`
+	Answer_text string `json:"ANSWER_TEXT"`
+}
+
+type restBlocks []restBlock
 
 var sessions = map[string]session{}
 
@@ -50,12 +73,24 @@ type Test struct {
 }
 
 const (
-	getUrl = "http://***REMOVED***:***REMOVED******REMOVED******REMOVED***
+	getUrl       = "http://***REMOVED***:***REMOVED******REMOVED******REMOVED***
+	urlQuestGet  = "http://***REMOVED***:***REMOVED******REMOVED******REMOVED***"
+	urlQuestPost = "http://***REMOVED***:***REMOVED******REMOVED******REMOVED***"
 )
 
 var cardOne = Card{
 	Question: "Что есть оториноларинголог?",
-	Options:  []string{"Ухо-горло-нос", "Печень-желчь-кишка", "Глаза-язык-легкие"},
+	// Options:  []string{"Ухо-горло-нос", "Печень-желчь-кишка", "Глаза-язык-легкие"},
+	Options: []Option{
+		Option{
+			Id:   9999,
+			Text: "Ухо-горло-нос",
+		},
+		Option{
+			Id:   10000,
+			Text: "Печень-желчь-кишка",
+		},
+	},
 }
 
 var users = Users{
@@ -91,16 +126,16 @@ var users = Users{
 	},
 }
 
-var testOne = Test{
-	User: getFullName(getUserById(1)),
-	Cards: []Card{
-		cardOne,
-		Card{
-			Question: "Какой глаз ведущий у правши?",
-			Options:  []string{"Левый", "Правый", "Средний (третий)"},
-		},
-	},
-}
+// var testOne = Test{
+// 	User: getFullName(getUserById(1)),
+// 	Cards: []Card{
+// 		cardOne,
+// 		Card{
+// 			Question: "Какой глаз ведущий у правши?",
+// 			Options:  []string{"Левый", "Правый", "Средний (третий)"},
+// 		},
+// 	},
+// }
 
 var templates = template.Must(template.ParseFiles("test.html"))
 
@@ -113,21 +148,51 @@ func main() {
 	log.Fatal(http.ListenAndServe(":***REMOVED***", nil))
 }
 
-func newTest(u User) Test {
+func newTest(u User, c []Card) Test {
+	// return Test{
+	// 	User: getFullName(u),
+	// 	Cards: []Card{
+	// 		cardOne,
+	// 		Card{
+	// 			Question: "Какой глаз ведущий у правши?",
+	// 			Options:  []string{"Левый", "Правый", "Средний (третий)"},
+	// 		},
+	// 	},
+	// }
 	return Test{
 		User: getFullName(u),
-		Cards: []Card{
-			cardOne,
-			Card{
-				Question: "Какой глаз ведущий у правши?",
-				Options:  []string{"Левый", "Правый", "Средний (третий)"},
-			},
-		},
+		// Cards: []Card{
+		// 	newCard(
+		// 		9999,
+		// 		"Что такое оториноларинголог?",
+		// 		[]Option{
+		// 			newOption(501, "Ухо-горло-нос"),
+		// 			newOption(502, "Почки-глаза"),
+		// 		},
+		// 	),
+		// },
+		Cards: c,
 	}
 }
 
-func getData() (m message, err error) {
-	resp, err := http.Get(getUrl)
+func newOption(id int, text string) Option {
+	var o Option
+	o.Id = id
+	o.Text = text
+	return o
+}
+
+func newCard(id int, question string, opts []Option) Card {
+	var c Card
+	c.Id = id
+	c.Question = question
+	c.Options = opts
+	return c
+
+}
+
+func getData(url string) (m message, err error) {
+	resp, err := http.Get(url)
 	if err != nil {
 		log.Printf("getUrl http.Get() error: %v", err)
 	}
@@ -143,8 +208,67 @@ func getData() (m message, err error) {
 	return message{}, err
 }
 
+/*
+func getCards() []Card {
+	var rbs restBlocks
+	var cards []Card
+	data, err := getData(urlQuestGet)
+	if err != nil {
+		log.Fatalf("get cards error: %v", err)
+	}
+	err = json.Unmarshal(data, &rbs)
+	if err != nil {
+		log.Fatalf("get cards error: %v", err)
+	}
+	var c Card
+	for _, b := range rbs {
+		if c.Id == b.id {
+			c.Options = append(
+				c.Options,
+				newOption(b.task_answer_id, b.answer_text),
+			)
+		}
+		if c.Id != b.id {
+			if c.Id > 0 {
+				cards = append(cards, c)
+			}
+			c.Id = b.id
+			c.Question = b.task_text
+		}
+	}
+	return cards
+}
+*/
+
+func getCards() []Card {
+	var rbs restBlocks
+	var cards []Card
+	data, err := getData(urlQuestGet)
+	if err != nil {
+		log.Fatalf("get cards error: %v", err)
+	}
+	err = json.Unmarshal(data, &rbs)
+	if err != nil {
+		log.Fatalf("get cards error: %v", err)
+	}
+	var c Card
+	for _, block := range rbs {
+		c.Id = block.Id
+		c.Question = block.Task_text
+		c.Options = []Option{}
+		for _, o := range block.Answers {
+			c.Options = append(
+				c.Options,
+				newOption(o.Id, o.Answer_text),
+			)
+		}
+		cards = append(cards, c)
+	}
+	return cards
+}
+
 func reqHandler(w http.ResponseWriter, r *http.Request) {
-	data, err := getData()
+	data, err := getData(urlQuestGet)
 	if err != nil {
 		log.Fatalf("req error: %v\n", err)
 	}
@@ -191,38 +315,55 @@ func signInHandler(w http.ResponseWriter, r *http.Request) {
 		// 	log.Printf("getUserByEmail() err: %v", err)
 		// 	http.Redirect(w, r, "/login", http.StatusFound)
 		// }
+
 		// Check if credentials are correct
 		form, err := json.Marshal(c)
 		if err != nil {
 			log.Printf("Marshal error: %v", err)
 		}
 
-		got, err := http.Post(
-			"",
+		resp, err := http.Post(
+			urlQuestPost,
 			"application/json",
 			bytes.NewBuffer(form),
 		)
-		if err != nil {
-			log.Fatalf("login error: %v")
-		}
 		log.Printf("json sent")
-		fmt.Fprintf(w, "%s", got)
-		break
-		if c == u.auth {
-			sessionToken := uuid.NewString()
-			expiresAt := time.Now().Add(2 * time.Hour)
-
-			sessions[sessionToken] = session{
-				email:  c.Email,
-				expiry: expiresAt,
-			}
-			log.Println("Login: success. Redirecting...")
-			http.Redirect(w, r, "/test", http.StatusFound)
-		} else {
-			err = errors.New("wrong password")
-			log.Printf("Login: %v\n", err)
-			http.Redirect(w, r, "/login", http.StatusFound)
+		if err != nil {
+			log.Fatalf("login error: %v", err)
 		}
+		// Read body
+		got, err := io.ReadAll(resp.Body)
+		if err != nil {
+			log.Fatalf("login error: %v", err)
+		}
+		fmt.Fprintf(w, "%s", getCards())
+		if json.Valid(got) {
+			r.Header.Add("Content-Type", "application/json")
+			fmt.Fprintf(w, "%s", got)
+			break
+		}
+		fmt.Fprintf(w, "%s", got)
+		log.Fatalln("got invalid json")
+		log.Println("Login: success. Redirecting...")
+		http.Redirect(w, r, "/test", http.StatusFound)
+
+		/*
+			if c == u.auth {
+				sessionToken := uuid.NewString()
+				expiresAt := time.Now().Add(2 * time.Hour)
+
+				sessions[sessionToken] = session{
+					email:  c.Email,
+					expiry: expiresAt,
+				}
+				log.Println("Login: success. Redirecting...")
+				http.Redirect(w, r, "/test", http.StatusFound)
+			} else {
+				err = errors.New("wrong password")
+				log.Printf("Login: %v\n", err)
+				http.Redirect(w, r, "/login", http.StatusFound)
+			}
+		*/
 	}
 }
 
@@ -245,6 +386,15 @@ func getFullName(u User) string {
 	return fmt.Sprintf("%s %s %s", u.surname, u.name, u.middlename)
 }
 
+func getSession(u User) session {
+	for uuid := range sessions {
+		s := sessions[uuid]
+		log.Printf("%v\n", s.email)
+		return s
+	}
+	return session{}
+}
+
 func getUserByEmail(e string) (user User, err error) {
 	for _, u := range users {
 		if e == u.auth.Email {
@@ -258,13 +408,18 @@ func getUserByEmail(e string) (user User, err error) {
 func makeHandler(fn func(http.ResponseWriter, *http.Request, Test)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var t Test
-		for _, s := range sessions {
-			u, err := getUserByEmail(s.email)
-			if err != nil {
-				log.Printf("Get current user error: %v", err)
-			}
-			t = newTest(u)
-		}
+		// for _, s := range sessions {
+		// 	u, err := getUserByEmail(s.email)
+		// 	if err != nil {
+		// 		log.Printf("Get current user error: %v", err)
+		// 	}
+		// 	t = newTest(u, getCards())
+		// }
+		c := getCards()
+		t = newTest(
+			getUserById(1),
+			c,
+		)
 		fn(w, r, t)
 	}
 }
