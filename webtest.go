@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -181,16 +182,32 @@ func signInHandler(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "login.html")
 	case "POST":
 		if err := r.ParseForm(); err != nil {
-			log.Printf("ParseForm() err: %v", err)
-			return
+			log.Fatalf("ParseForm() err: %v", err)
 		}
-		f := r.PostForm
-		c := readCreds(f)
-		u, err := getUserByEmail(c.Email)
+		// f := r.PostForm
+		c := readCreds(r.PostForm)
+		// u, err := getUserByEmail(c.Email)
+		// if err != nil {
+		// 	log.Printf("getUserByEmail() err: %v", err)
+		// 	http.Redirect(w, r, "/login", http.StatusFound)
+		// }
+		// Check if credentials are correct
+		form, err := json.Marshal(c)
 		if err != nil {
-			log.Printf("getUserByEmail() err: %v", err)
-			http.Redirect(w, r, "/login", http.StatusFound)
+			log.Printf("Marshal error: %v", err)
 		}
+
+		got, err := http.Post(
+			"",
+			"application/json",
+			bytes.NewBuffer(form),
+		)
+		if err != nil {
+			log.Fatalf("login error: %v")
+		}
+		log.Printf("json sent")
+		fmt.Fprintf(w, "%s", got)
+		break
 		if c == u.auth {
 			sessionToken := uuid.NewString()
 			expiresAt := time.Now().Add(2 * time.Hour)
