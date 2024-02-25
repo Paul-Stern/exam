@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -11,6 +10,8 @@ import (
 	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type Option struct {
@@ -310,60 +311,60 @@ func signInHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		// f := r.PostForm
 		c := readCreds(r.PostForm)
-		// u, err := getUserByEmail(c.Email)
-		// if err != nil {
-		// 	log.Printf("getUserByEmail() err: %v", err)
-		// 	http.Redirect(w, r, "/login", http.StatusFound)
-		// }
-
-		// Check if credentials are correct
-		form, err := json.Marshal(c)
+		u, err := getUserByEmail(c.Email)
 		if err != nil {
-			log.Printf("Marshal error: %v", err)
+			log.Printf("getUserByEmail() err: %v", err)
+			http.Redirect(w, r, "/login", http.StatusFound)
 		}
-
-		resp, err := http.Post(
-			urlQuestPost,
-			"application/json",
-			bytes.NewBuffer(form),
-		)
-		log.Printf("json sent")
-		if err != nil {
-			log.Fatalf("login error: %v", err)
-		}
-		// Read body
-		got, err := io.ReadAll(resp.Body)
-		if err != nil {
-			log.Fatalf("login error: %v", err)
-		}
-		fmt.Fprintf(w, "%s", getCards())
-		if json.Valid(got) {
-			r.Header.Add("Content-Type", "application/json")
-			fmt.Fprintf(w, "%s", got)
-			break
-		}
-		fmt.Fprintf(w, "%s", got)
-		log.Fatalln("got invalid json")
-		log.Println("Login: success. Redirecting...")
-		http.Redirect(w, r, "/test", http.StatusFound)
 
 		/*
-			if c == u.auth {
-				sessionToken := uuid.NewString()
-				expiresAt := time.Now().Add(2 * time.Hour)
-
-				sessions[sessionToken] = session{
-					email:  c.Email,
-					expiry: expiresAt,
-				}
-				log.Println("Login: success. Redirecting...")
-				http.Redirect(w, r, "/test", http.StatusFound)
-			} else {
-				err = errors.New("wrong password")
-				log.Printf("Login: %v\n", err)
-				http.Redirect(w, r, "/login", http.StatusFound)
+			form, err := json.Marshal(c)
+			if err != nil {
+				log.Printf("Marshal error: %v", err)
 			}
+
+			resp, err := http.Post(
+				urlQuestPost,
+				"application/json",
+				bytes.NewBuffer(form),
+			)
+			log.Printf("json sent")
+			if err != nil {
+				log.Fatalf("login error: %v", err)
+			}
+			// Read body
+			got, err := io.ReadAll(resp.Body)
+			if err != nil {
+				log.Fatalf("login error: %v", err)
+			}
+			fmt.Fprintf(w, "%s", getCards())
+			if json.Valid(got) {
+				r.Header.Add("Content-Type", "application/json")
+				fmt.Fprintf(w, "%s", got)
+				break
+			}
+			fmt.Fprintf(w, "%s", got)
+			log.Fatalln("got invalid json")
+			log.Println("Login: success. Redirecting...")
+			http.Redirect(w, r, "/test", http.StatusFound)
 		*/
+
+		// Check if credentials are correct
+		if c == u.auth {
+			sessionToken := uuid.NewString()
+			expiresAt := time.Now().Add(2 * time.Hour)
+
+			sessions[sessionToken] = session{
+				email:  c.Email,
+				expiry: expiresAt,
+			}
+			log.Println("Login: success. Redirecting...")
+			http.Redirect(w, r, "/test", http.StatusFound)
+		} else {
+			err = errors.New("wrong password")
+			log.Printf("Login: %v\n", err)
+			http.Redirect(w, r, "/login", http.StatusFound)
+		}
 	}
 }
 
@@ -408,18 +409,18 @@ func getUserByEmail(e string) (user User, err error) {
 func makeHandler(fn func(http.ResponseWriter, *http.Request, Test)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var t Test
-		// for _, s := range sessions {
-		// 	u, err := getUserByEmail(s.email)
-		// 	if err != nil {
-		// 		log.Printf("Get current user error: %v", err)
-		// 	}
-		// 	t = newTest(u, getCards())
-		// }
 		c := getCards()
-		t = newTest(
-			getUserById(1),
-			c,
-		)
+		for _, s := range sessions {
+			u, err := getUserByEmail(s.email)
+			if err != nil {
+				log.Printf("Get current user error: %v", err)
+			}
+			t = newTest(u, c)
+		}
+		// t = newTest(
+		// 	getUserById(1),
+		// 	c,
+		// )
 		fn(w, r, t)
 	}
 }
