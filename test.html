@@ -151,6 +151,18 @@
             return card.getAttribute("class").includes("js-current");
         }
         document.addEventListener("DOMContentLoaded", initProgress);
+        window.addEventListener(
+            "keydown",
+            (event) => {
+                if (event.key === "ArrowRight") {goNext()}
+            }
+        )
+        window.addEventListener(
+            "keydown",
+            (event) => {
+                if (event.key === "ArrowLeft") {goBack()}
+            }
+        )
         document.getElementById("js-btn-next").addEventListener("click", goNext)
         document.getElementById("js-btn-back").addEventListener("click", goBack)
     </script>
