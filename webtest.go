@@ -80,21 +80,6 @@ const (
 	urlQuestPost = "http://***REMOVED***:***REMOVED******REMOVED******REMOVED***"
 )
 
-var cardOne = Card{
-	Question: "Что есть оториноларинголог?",
-	// Options:  []string{"Ухо-горло-нос", "Печень-желчь-кишка", "Глаза-язык-легкие"},
-	Options: []Option{
-		Option{
-			Id:   9999,
-			Text: "Ухо-горло-нос",
-		},
-		Option{
-			Id:   10000,
-			Text: "Печень-желчь-кишка",
-		},
-	},
-}
-
 var users = Users{
 	User{
 		id:         1,
@@ -128,17 +113,6 @@ var users = Users{
 	},
 }
 
-// var testOne = Test{
-// 	User: getFullName(getUserById(1)),
-// 	Cards: []Card{
-// 		cardOne,
-// 		Card{
-// 			Question: "Какой глаз ведущий у правши?",
-// 			Options:  []string{"Левый", "Правый", "Средний (третий)"},
-// 		},
-// 	},
-// }
-
 var templates = template.Must(template.ParseFiles("test.html"))
 
 func main() {
@@ -152,28 +126,8 @@ func main() {
 }
 
 func newTest(u User, c []Card) Test {
-	// return Test{
-	// 	User: getFullName(u),
-	// 	Cards: []Card{
-	// 		cardOne,
-	// 		Card{
-	// 			Question: "Какой глаз ведущий у правши?",
-	// 			Options:  []string{"Левый", "Правый", "Средний (третий)"},
-	// 		},
-	// 	},
-	// }
 	return Test{
-		User: getFullName(u),
-		// Cards: []Card{
-		// 	newCard(
-		// 		9999,
-		// 		"Что такое оториноларинголог?",
-		// 		[]Option{
-		// 			newOption(501, "Ухо-горло-нос"),
-		// 			newOption(502, "Почки-глаза"),
-		// 		},
-		// 	),
-		// },
+		User:  getFullName(u),
 		Cards: c,
 	}
 }
@@ -211,67 +165,6 @@ func getData(url string) (m message, err error) {
 	return message{}, err
 }
 
-/*
-func getCards() []Card {
-	var rbs restBlocks
-	var cards []Card
-	data, err := getData(urlQuestGet)
-	if err != nil {
-		log.Fatalf("get cards error: %v", err)
-	}
-	err = json.Unmarshal(data, &rbs)
-	if err != nil {
-		log.Fatalf("get cards error: %v", err)
-	}
-	var c Card
-	for _, b := range rbs {
-		if c.Id == b.id {
-			c.Options = append(
-				c.Options,
-				newOption(b.task_answer_id, b.answer_text),
-			)
-		}
-		if c.Id != b.id {
-			if c.Id > 0 {
-				cards = append(cards, c)
-			}
-			c.Id = b.id
-			c.Question = b.task_text
-		}
-	}
-	return cards
-}
-
-
-
-func getCards() []Card {
-	var rbs restBlocks
-	var cards []Card
-	data, err := getData(urlQuestGet)
-	if err != nil {
-		log.Fatalf("get cards error: %v", err)
-	}
-	err = json.Unmarshal(data, &rbs)
-	if err != nil {
-		log.Fatalf("get cards error: %v", err)
-	}
-	var c Card
-	for _, block := range rbs {
-		c.Id = block.Id
-		c.Question = block.Task_text
-		c.Options = []Option{}
-		for _, o := range block.Answers {
-			c.Options = append(
-				c.Options,
-				newOption(o.Id, o.Answer_text),
-			)
-		}
-		cards = append(cards, c)
-	}
-	return cards
-}
-*/
-
 func getPostJson(c Credentials) (j message) {
 	out, err := json.Marshal(c)
 	if err != nil {
@@ -282,6 +175,9 @@ func getPostJson(c Credentials) (j message) {
 		"application/json",
 		bytes.NewBuffer(out),
 	)
+	if err != nil {
+		log.Fatalf("post error: %v", err)
+	}
 	// Read body
 	got, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -348,7 +244,6 @@ func viewHandler(w http.ResponseWriter, r *http.Request, t Test) {
 	}
 }
 func postHandler(w http.ResponseWriter, r *http.Request) {
-	// rbs := getRestBlock(getUserById(1).auth)
 	j := getPostJson(getUserCreds(1))
 	w.Header().Add("Content-Type", "application/json")
 	fmt.Fprintf(w, "%s", j)
@@ -363,45 +258,13 @@ func signInHandler(w http.ResponseWriter, r *http.Request) {
 		if err := r.ParseForm(); err != nil {
 			log.Fatalf("ParseForm() err: %v", err)
 		}
-		// f := r.PostForm
+
 		c := readCreds(r.PostForm)
 		u, err := getUserByEmail(c.Email)
 		if err != nil {
 			log.Printf("getUserByEmail() err: %v", err)
 			http.Redirect(w, r, "/login", http.StatusFound)
 		}
-
-		/*
-			form, err := json.Marshal(c)
-			if err != nil {
-				log.Printf("Marshal error: %v", err)
-			}
-
-			resp, err := http.Post(
-				urlQuestPost,
-				"application/json",
-				bytes.NewBuffer(form),
-			)
-			log.Printf("json sent")
-			if err != nil {
-				log.Fatalf("login error: %v", err)
-			}
-			// Read body
-			got, err := io.ReadAll(resp.Body)
-			if err != nil {
-				log.Fatalf("login error: %v", err)
-			}
-			fmt.Fprintf(w, "%s", getCards())
-			if json.Valid(got) {
-				r.Header.Add("Content-Type", "application/json")
-				fmt.Fprintf(w, "%s", got)
-				break
-			}
-			fmt.Fprintf(w, "%s", got)
-			log.Fatalln("got invalid json")
-			log.Println("Login: success. Redirecting...")
-			http.Redirect(w, r, "/test", http.StatusFound)
-		*/
 
 		// Check if credentials are correct
 		if c == u.auth {
@@ -471,10 +334,6 @@ func makeHandler(fn func(http.ResponseWriter, *http.Request, Test)) http.Handler
 			c := getCards(getRestBlock(u.auth))
 			t = newTest(u, c)
 		}
-		// t = newTest(
-		// 	getUserById(1),
-		// 	c,
-		// )
 		fn(w, r, t)
 	}
 }
