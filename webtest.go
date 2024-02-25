@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"html/template"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -28,6 +29,8 @@ type session struct {
 	expiry time.Time
 }
 
+type message []byte
+
 var sessions = map[string]session{}
 
 type User struct {
@@ -44,6 +47,10 @@ type Test struct {
 	User  string
 	Cards []Card
 }
+
+const (
+	getUrl = "http://***REMOVED***:***REMOVED******REMOVED******REMOVED***
+)
 
 var cardOne = Card{
 	Question: "Что есть оториноларинголог?",
@@ -100,6 +107,7 @@ func main() {
 	http.HandleFunc("/test", makeHandler(viewHandler))
 	http.HandleFunc("/login", signInHandler)
 	http.HandleFunc("/json", jsonHandler)
+	http.HandleFunc("/req", reqHandler)
 	log.Println("Server started. Listening to localhost:***REMOVED***")
 	log.Fatal(http.ListenAndServe(":***REMOVED***", nil))
 }
@@ -115,6 +123,32 @@ func newTest(u User) Test {
 			},
 		},
 	}
+}
+
+func getData() (m message, err error) {
+	resp, err := http.Get(getUrl)
+	if err != nil {
+		log.Printf("getUrl http.Get() error: %v", err)
+	}
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Printf("getUrl io.ReadAll() error: %v", err)
+	}
+	if json.Valid(body) {
+		return body, nil
+	}
+	err = errors.New("not a valid json")
+	return message{}, err
+}
+
+func reqHandler(w http.ResponseWriter, r *http.Request) {
+	data, err := getData()
+	if err != nil {
+		log.Fatalf("req error: %v\n", err)
+	}
+	w.Header().Add("Content-type", "application/json")
+	fmt.Fprintf(w, "%s", data)
 }
 
 func jsonHandler(w http.ResponseWriter, r *http.Request) {
