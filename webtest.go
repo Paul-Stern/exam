@@ -100,6 +100,7 @@ const (
 	getUrl       = "http://***REMOVED***:***REMOVED******REMOVED******REMOVED***
 	urlQuestGet  = "http://***REMOVED***:***REMOVED******REMOVED******REMOVED***"
 	urlQuestPost = "http://***REMOVED***:***REMOVED******REMOVED******REMOVED***"
+	urlTestPost  = "http://***REMOVED***:***REMOVED******REMOVED***SaveTestResults"
 	urlPostRes   = "http://***REMOVED***:***REMOVED***/post"
 )
 
@@ -318,13 +319,15 @@ func viewHandler(w http.ResponseWriter, r *http.Request, t Test) {
 		log.Printf("%s", f)
 		// cr := newCardResult(f)
 		// w.Header().Add("Content-Type", "application/json")
-		j, err := json.Marshal(newCardsResult(f))
-		log.Printf("%s", j)
-		if err != nil {
-			log.Printf("post error: %v", err)
-		}
-		w.Header().Add("Content-Type", "application/json")
-		fmt.Fprintf(w, "%s", j)
+		tr := newCardsResult(f)
+		log.Printf("%s", tr)
+		// if err != nil {
+		// 	log.Printf("post error: %v", err)
+		// }
+		r := sendPostJson(tr, urlTestPost)
+
+		// w.Header().Add("Content-Type", "application/json")
+		fmt.Fprintf(w, "%s", r)
 
 		// log.Println(f)
 		// http.Redirect(w, r, "/login", http.StatusFound)
