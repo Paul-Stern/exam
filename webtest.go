@@ -240,9 +240,13 @@ func getPostJson(c Credentials, url string) (j message) {
 	}
 	return got
 }
-func sendPostJson(r CardsResult, url string) *http.Response {
+func sendPostJson(r TestResult, url string) *http.Response {
 	j, err := json.Marshal(r)
 	if err != nil {
+		log.Printf("sendPostJson error: %v", err)
+	}
+	if !json.Valid(j) {
+		err = errors.New("json is not valid")
 		log.Printf("sendPostJson error: %v", err)
 	}
 	res, err := http.Post(
