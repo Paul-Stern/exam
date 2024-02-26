@@ -139,6 +139,7 @@ func main() {
 	http.HandleFunc("/login", signInHandler)
 	http.HandleFunc("/json", jsonHandler)
 	http.HandleFunc("/req", reqHandler)
+	// Helps to test getting answers over post
 	http.HandleFunc("/post", postHandler)
 	log.Println("Server started. Listening to localhost:***REMOVED***")
 	log.Fatal(http.ListenAndServe(":***REMOVED***", nil))
@@ -309,8 +310,8 @@ func viewHandler(w http.ResponseWriter, r *http.Request, t Test) {
 	}
 }
 func postHandler(w http.ResponseWriter, r *http.Request) {
-	// j := getPostJson(getUserCreds(1))
-	b := r.Body
+	b := getPostJson(getUserCreds(1), urlQuestPost)
+	// b := r.Body
 	w.Header().Add("Content-Type", "application/json")
 	fmt.Fprintf(w, "%s", b)
 
