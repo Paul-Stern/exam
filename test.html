@@ -21,6 +21,15 @@
         <div class="js-card{{if eq $i 0}} js-current{{else}} d-none{{end}}">
             <h1>Вопрос №{{$card.Id}}</h1>
             <h2>{{$card.Question}}</h2>
+            {{if $card.Appendix}}
+            <h6>
+                <ol>
+                    {{range $apI, $apItem := $card.Appendix}}
+                        <li>{{$apItem}}</li>
+                    {{end}}
+                </ol>
+            </h6>
+            {{end}}
             <ol>
                 {{range $j, $o := $card.Options}}
                 <h5>
