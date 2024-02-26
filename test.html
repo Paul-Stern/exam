@@ -20,19 +20,16 @@
         {{range $i, $card := .Cards}}
         <div class="js-card{{if eq $i 0}} js-current{{else}} d-none{{end}}">
             <h1>Вопрос №{{$card.Id}}</h1>
-            <h2>{{$card.Question}}</h2>
+            <h5 class="text-body fw-medium">{{$card.Question}}</h5>
             {{if $card.Appendix}}
-            <h6>
                 <ol>
                     {{range $apI, $apItem := $card.Appendix}}
                         <li>{{$apItem}}</li>
                     {{end}}
                 </ol>
-            </h6>
             {{end}}
             <ol>
                 {{range $j, $o := $card.Options}}
-                <h5>
                 <li>
                     <div class="form-check">
                         <label class="form-check-label" for="answer_{{$j}}">
@@ -41,7 +38,6 @@
                         </label>
                     </div>
                 </li>
-                </h5>
                 {{end}}
             </ol>
         </div>
