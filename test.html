@@ -8,6 +8,11 @@
             rel="stylesheet"
             integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
             crossorigin="anonymous">
+    <style>
+        .mb-6 {
+            margin-bottom: 4.5rem;
+        }
+    </style>
 </head>
 <body>
     <div class="progress" role="progressbar">
@@ -18,7 +23,7 @@
         <h6 class="text-secondary">Работник: {{.User}}</h6>
         <form action="/test" method="post" class="mb-5">
             {{range $i, $card := .Cards}}
-            <div class="js-card{{if eq $i 0}} js-current{{else}} d-none{{end}}">
+            <div class="js-card{{if eq $i 0}} js-current{{else}} d-none{{end}} mb-6">
                 <h1>Вопрос №{{$card.Id}}</h1>
                 <h5 class="text-body fw-medium">{{$card.Question}}</h5>
                 {{if $card.Appendix}}
