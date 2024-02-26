@@ -10,16 +10,30 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 	"time"
 	"unicode/utf8"
 
 	"github.com/google/uuid"
+	"gopkg.in/yaml.v3"
 )
 
 type Option struct {
 	Id   int
 	Text string
+}
+
+type Config struct {
+	Server struct {
+		Host  string `yaml:"host"`
+		Port  string `yaml:"port"`
+		Rest  string `yaml:"restPath"`
+		Nodes struct {
+			GetQuestions    string `yaml:"getQuestions"`
+			SaveTestResults string `yaml:"saveTestResult"`
+		} `yaml:"nodes"`
+	} `yaml:"server"`
 }
 
 type Card struct {
@@ -139,7 +153,12 @@ var users = Users{
 
 var templates = template.Must(template.ParseFiles("test.html"))
 
+var cfg Config
+
 func main() {
+	readConf(&cfg)
+	log.Println(getQuestionUrl(cfg))
+
 	http.HandleFunc("/test", makeHandler(viewHandler))
 	http.HandleFunc("/login", signInHandler)
 	http.HandleFunc("/json", jsonHandler)
@@ -148,6 +167,46 @@ func main() {
 	http.HandleFunc("/post", postHandler)
 	log.Println("Server started. Listening to localhost:***REMOVED***")
 	log.Fatal(http.ListenAndServe(":***REMOVED***", nil))
+}
+func processError(err error) {
+	fmt.Println(err)
+	os.Exit(2)
+}
+
+func readConf(cfg *Config) {
+	f, err := os.Open("config.yaml")
+	if err != nil {
+		processError(err)
+	}
+	defer f.Close()
+
+	decoder := yaml.NewDecoder(f)
+	err = decoder.Decode(cfg)
+	if err != nil {
+		processError(err)
+	}
+}
+
+func getQuestionUrl(cfg Config) string {
+	return strings.Join([]string{
+		"http://",
+		cfg.Server.Host,
+		":",
+		cfg.Server.Port,
+		cfg.Server.Rest,
+		cfg.Server.Nodes.GetQuestions,
+	}, "")
+}
+
+func getSaveUrl(cfg Config) string {
+	return strings.Join([]string{
+		"http://",
+		cfg.Server.Host,
+		":",
+		cfg.Server.Port,
+		cfg.Server.Rest,
+		cfg.Server.Nodes.SaveTestResults,
+	}, "")
 }
 
 func newTest(u User, c []Card) Test {
@@ -264,7 +323,7 @@ func sendPostJson(r TestResult, url string) *http.Response {
 }
 
 func getRestBlock(c Credentials) (rbs restBlocks) {
-	got := getPostJson(c, urlQuestPost)
+	got := getPostJson(c, getQuestionUrl(cfg))
 	err := json.Unmarshal(got, &rbs)
 	if err != nil {
 		log.Fatalf("getRestBlock error: %v", err)
@@ -324,7 +383,7 @@ func viewHandler(w http.ResponseWriter, r *http.Request, t Test) {
 		// if err != nil {
 		// 	log.Printf("post error: %v", err)
 		// }
-		r := sendPostJson(tr, urlTestPost)
+		r := sendPostJson(tr, getSaveUrl(cfg))
 
 		// w.Header().Add("Content-Type", "application/json")
 		fmt.Fprintf(w, "%s", r)
@@ -334,7 +393,7 @@ func viewHandler(w http.ResponseWriter, r *http.Request, t Test) {
 	}
 }
 func postHandler(w http.ResponseWriter, r *http.Request) {
-	b := getPostJson(getUserCreds(1), urlQuestPost)
+	b := getPostJson(getUserCreds(1), getQuestionUrl(cfg))
 	// b := r.Body
 	w.Header().Add("Content-Type", "application/json")
 	fmt.Fprintf(w, "%s", b)
