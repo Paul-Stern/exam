@@ -26,6 +26,9 @@ type Option struct {
 
 type Config struct {
 	Server struct {
+		Port string `yaml:"port"`
+	} `yaml:"server"`
+	Rest struct {
 		Host  string `yaml:"host"`
 		Port  string `yaml:"port"`
 		Rest  string `yaml:"restPath"`
@@ -33,7 +36,7 @@ type Config struct {
 			GetQuestions    string `yaml:"getQuestions"`
 			SaveTestResults string `yaml:"saveTestResult"`
 		} `yaml:"nodes"`
-	} `yaml:"server"`
+	} `yaml:"rest"`
 }
 
 type Card struct {
@@ -110,14 +113,6 @@ type Test struct {
 	Cards []Card
 }
 
-const (
-	getUrl       = "http://***REMOVED***:***REMOVED******REMOVED******REMOVED***
-	urlQuestGet  = "http://***REMOVED***:***REMOVED******REMOVED******REMOVED***"
-	urlQuestPost = "http://***REMOVED***:***REMOVED******REMOVED******REMOVED***"
-	urlTestPost  = "http://***REMOVED***:***REMOVED******REMOVED***SaveTestResults"
-	urlPostRes   = "http://***REMOVED***:***REMOVED***/post"
-)
-
 var users = Users{
 	User{
 		id:         1,
@@ -157,16 +152,14 @@ var cfg Config
 
 func main() {
 	readConf(&cfg)
-	log.Println(getQuestionUrl(cfg))
 
 	http.HandleFunc("/test", makeHandler(viewHandler))
 	http.HandleFunc("/login", signInHandler)
 	http.HandleFunc("/json", jsonHandler)
-	http.HandleFunc("/req", reqHandler)
 	// Helps to test getting answers over post
 	http.HandleFunc("/post", postHandler)
-	log.Println("Server started. Listening to localhost:***REMOVED***")
-	log.Fatal(http.ListenAndServe(":***REMOVED***", nil))
+	log.Printf("Server started. Listening to localhost%s", ":"+cfg.Server.Port)
+	log.Fatal(http.ListenAndServe(":"+cfg.Server.Port, nil))
 }
 func processError(err error) {
 	fmt.Println(err)
@@ -190,22 +183,22 @@ func readConf(cfg *Config) {
 func getQuestionUrl(cfg Config) string {
 	return strings.Join([]string{
 		"http://",
-		cfg.Server.Host,
+		cfg.Rest.Host,
 		":",
-		cfg.Server.Port,
-		cfg.Server.Rest,
-		cfg.Server.Nodes.GetQuestions,
+		cfg.Rest.Port,
+		cfg.Rest.Rest,
+		cfg.Rest.Nodes.GetQuestions,
 	}, "")
 }
 
 func getSaveUrl(cfg Config) string {
 	return strings.Join([]string{
 		"http://",
-		cfg.Server.Host,
+		cfg.Rest.Host,
 		":",
-		cfg.Server.Port,
-		cfg.Server.Rest,
-		cfg.Server.Nodes.SaveTestResults,
+		cfg.Rest.Port,
+		cfg.Rest.Rest,
+		cfg.Rest.Nodes.SaveTestResults,
 	}, "")
 }
 
@@ -346,14 +339,6 @@ func getCards(rbs restBlocks) (cards []Card) {
 		cards = append(cards, c)
 	}
 	return cards
-}
-func reqHandler(w http.ResponseWriter, r *http.Request) {
-	data, err := getData(urlQuestGet)
-	if err != nil {
-		log.Fatalf("req error: %v\n", err)
-	}
-	w.Header().Add("Content-type", "application/json")
-	fmt.Fprintf(w, "%s", data)
 }
 
 func jsonHandler(w http.ResponseWriter, r *http.Request) {
