@@ -25,15 +25,15 @@
             {{range $i, $card := .Cards}}
             <div class="js-card{{if eq $i 0}} js-current{{else}} d-none{{end}} mb-6">
                 <h5>Вопрос №{{$card.Id}}</h5>
-                <p class="fw-medium">{{$card.Question}}<p>
+                <div class="fw-medium mb-1">{{$card.Question}}</div>
                 {{if $card.Appendix}}
-                    <ol>
+                    <ol class="mb-2">
                         {{range $apI, $apItem := $card.Appendix}}
                             <li>{{$apItem}}</li>
                         {{end}}
                     </ol>
                 {{end}}
-                <h5 class="text-body fw-normal">
+                <div class="text-body mt-1 fw-normal">
                 {{range $j, $o := $card.Options}}
                     <div class="form-check mb-3">
                         <label class="form-check-label" for="answer_{{$j}}">
@@ -42,7 +42,7 @@
                         </label>
                     </div>
                 {{end}}
-                </h5>
+                </div>
             </div>
             {{end}}
             <div class="row mt-3 fixed-bottom">
