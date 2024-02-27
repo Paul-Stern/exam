@@ -25,8 +25,8 @@ type Test struct {
 }
 
 type Result struct {
-	QuestionId string   `json:"questionId"`
-	AnswerIds  []string `json:"answersIds"`
+	QuestionId int   `json:"questionId"`
+	AnswerIds  []int `json:"answersIds"`
 }
 
 type TestResult struct {
@@ -57,15 +57,15 @@ type finishTest struct {
 	RetCode int `json:"RetCode"`
 }
 
-func flattenMap(vals url.Values) (m map[string]string) {
-	m = make(map[string]string)
+func flattenMap(vals url.Values) (m map[string]int) {
+	m = make(map[string]int)
 	for k, v := range vals {
-		m[k] = v[0]
+		m[k], _ = strconv.Atoi(v[0])
 	}
 	return m
 }
 
-func (tr TestResult) indexOf(id string) (index int, found bool) {
+func (tr TestResult) indexOf(id int) (index int, found bool) {
 	index = -1
 	for i := 0; i < len(tr.Results); i++ {
 		if id == tr.Results[i].QuestionId {
@@ -79,14 +79,15 @@ func (tr TestResult) indexOf(id string) (index int, found bool) {
 
 func newTestResult(vals url.Values) (tr TestResult, err error) {
 	m := flattenMap(vals)
-	tr.UserId, err = strconv.Atoi(m["userId"])
+	tr.UserId = m["userId"]
 	if err != nil {
 		return tr, err
 	}
 	for k, v := range m {
 		var r Result
 		if strings.Contains(k, "answer_on_question_") {
-			r.QuestionId, _ = strings.CutPrefix(k, "answer_on_question_")
+			idString, _ := strings.CutPrefix(k, "answer_on_question_")
+			r.QuestionId, err = strconv.Atoi(idString)
 			r.AnswerIds = append(r.AnswerIds, v)
 			i, found := tr.indexOf(r.QuestionId)
 			if found {
