@@ -23,7 +23,7 @@
         <h6 class="text-secondary">Работник: {{.User}}</h6>
         <form action="/test" method="post" class="mb-5">
             {{range $i, $card := .Cards}}
-            <div class="js-card{{if eq $i 0}} js-current{{else}} d-none{{end}} mb-6">
+            <div class="js-card{{if eq $i 0}} js-current{{else}} d-none{{end}} mb-5">
                 <h5>Вопрос №{{$card.Id}}</h5>
                 <div class="fw-medium mb-1">{{$card.Question}}</div>
                 {{if $card.Appendix}}
@@ -46,9 +46,9 @@
             </div>
             {{end}}
             <div class="row mt-3 px-1 fixed-bottom">
-                <button id="js-btn-back" type="button" class="col btn btn-primary btn-lg ms-2 invisible">Назад</button>
-                <button id="js-btn-next" type="button" class="col btn btn-primary btn-lg me-2">Вперед</button>
-                <button id="js-btn-done" type="submit" class="col btn btn-success btn-lg me-2 d-none">Готово</button>
+                <button id="js-btn-back" type="button" class="col btn btn-primary ms-2 invisible">Назад</button>
+                <button id="js-btn-next" type="button" class="col btn btn-primary me-2">Вперед</button>
+                <button id="js-btn-done" type="submit" class="col btn btn-success me-2 d-none">Готово</button>
             </div>
         </form>
     </div>
