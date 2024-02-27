@@ -142,9 +142,13 @@ func viewHandler(w http.ResponseWriter, r *http.Request, t Test) {
 		// 	log.Printf("post error: %v", err)
 		// }
 		r := sendPostJson(tr, getSaveUrl(cfg))
+		got, err := io.ReadAll(r.Body)
 
-		// w.Header().Add("Content-Type", "application/json")
-		fmt.Fprintf(w, "%s", r)
+		w.Header().Add("Content-Type", "application/json")
+		if err != nil {
+			log.Fatalf("post error: %v", err)
+		}
+		fmt.Fprintf(w, "%s", got)
 
 		// log.Println(f)
 		// http.Redirect(w, r, "/login", http.StatusFound)
