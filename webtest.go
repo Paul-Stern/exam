@@ -138,7 +138,7 @@ func viewHandler(w http.ResponseWriter, r *http.Request, t Test) {
 		}
 		f := r.PostForm
 		log.Printf("%s", f)
-		tr, err := newCardsResult(f)
+		tr, err := newTestResult(f)
 		if err != nil {
 			log.Printf("post error: %v", err)
 		}

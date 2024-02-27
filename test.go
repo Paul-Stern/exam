@@ -77,7 +77,7 @@ func (tr TestResult) indexOf(id string) (index int, found bool) {
 	return
 }
 
-func newCardsResult(vals url.Values) (tr TestResult, err error) {
+func newTestResult(vals url.Values) (tr TestResult, err error) {
 	m := flattenMap(vals)
 	tr.UserId, err = strconv.Atoi(m["userId"])
 	if err != nil {
