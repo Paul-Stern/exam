@@ -1,0 +1,1 @@
+Don't forget to create a config file before you run the programme
