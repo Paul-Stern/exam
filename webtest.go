@@ -11,62 +11,12 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"strings"
 	"time"
-	"unicode/utf8"
 
 	"github.com/google/uuid"
-	"gopkg.in/yaml.v3"
 )
 
-type Option struct {
-	Id   int
-	Text string
-}
-
-type Config struct {
-	Server struct {
-		Port string `yaml:"port"`
-	} `yaml:"server"`
-	Rest struct {
-		Host  string `yaml:"host"`
-		Port  string `yaml:"port"`
-		Rest  string `yaml:"restPath"`
-		Nodes struct {
-			GetQuestions    string `yaml:"getQuestions"`
-			SaveTestResults string `yaml:"saveTestResult"`
-		} `yaml:"nodes"`
-	} `yaml:"rest"`
-}
-
-type Card struct {
-	Id       int
-	Question string
-	Appendix []string
-	Options  []Option
-}
-
-type Credentials struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
 type Answer int
-
-type Result struct {
-	QuestionId string   `json:"questionId"`
-	AnswerIds  []string `json:"answersIds"`
-}
-
-type TestResult struct {
-	UserId  int      `json:"userId"`
-	Results []Result `json:"results"`
-}
-
-type CardsResult []struct {
-	QuestionId int   `json:"QuestionId"`
-	AnswerIds  []int `json:"AnswerId"`
-}
 
 type session struct {
 	email  string
@@ -75,78 +25,9 @@ type session struct {
 
 type message []byte
 
-//	type restBlock struct {
-//		id             int    `json:"id"`
-//		task_text      string `json:"task_text"`
-//		task_answer_id int    `json:"task_answer_id"`
-//		answer_text    string `json:"answer_text"`
-//	}
-
-type restBlock struct {
-	Id            int       `json:"ID"`
-	Task_text     string    `json:"TASK_TEXT"`
-	Task_appendix []string  `json:"TASK_APPENDIX"`
-	Answers       []restOpt `json:"ANSWERS"`
-}
-
-type restOpt struct {
-	Id          int    `json:"ID"`
-	Answer_text string `json:"ANSWER_TEXT"`
-}
-
-type restBlocks []restBlock
-
 var sessions = map[string]session{}
 
-type User struct {
-	id         int
-	name       string
-	middlename string
-	surname    string
-	auth       Credentials
-}
-
-type Users []User
-
-type Test struct {
-	User  string
-	Cards []Card
-}
-
-var users = Users{
-	User{
-		id:         1,
-		name:       "Евгений",
-		middlename: "Семенович",
-		surname:    "Коновалов",
-		auth: Credentials{
-			Email:    ***REMOVED***,
-			Password: ***REMOVED***,
-		},
-	},
-	User{
-		id:         2,
-		name:       "Юлиан",
-		middlename: "Петрович",
-		surname:    "Костоправ",
-		auth: Credentials{
-			Email:    ***REMOVED***,
-			Password: ***REMOVED***,
-		},
-	},
-	User{
-		id:         3,
-		name:       "Герман",
-		middlename: "Станиславович",
-		surname:    "Кривонос",
-		auth: Credentials{
-			Email:    ***REMOVED***,
-			Password: ***REMOVED***,
-		},
-	},
-}
-
-var templates = template.Must(template.ParseFiles("test.html"))
+var templates = template.Must(template.ParseFiles("templates/test.html"))
 
 var cfg Config
 
@@ -166,49 +47,6 @@ func processError(err error) {
 	os.Exit(2)
 }
 
-func readConf(cfg *Config) {
-	f, err := os.Open("config.yaml")
-	if err != nil {
-		processError(err)
-	}
-	defer f.Close()
-
-	decoder := yaml.NewDecoder(f)
-	err = decoder.Decode(cfg)
-	if err != nil {
-		processError(err)
-	}
-}
-
-func getQuestionUrl(cfg Config) string {
-	return strings.Join([]string{
-		"http://",
-		cfg.Rest.Host,
-		":",
-		cfg.Rest.Port,
-		cfg.Rest.Rest,
-		cfg.Rest.Nodes.GetQuestions,
-	}, "")
-}
-
-func getSaveUrl(cfg Config) string {
-	return strings.Join([]string{
-		"http://",
-		cfg.Rest.Host,
-		":",
-		cfg.Rest.Port,
-		cfg.Rest.Rest,
-		cfg.Rest.Nodes.SaveTestResults,
-	}, "")
-}
-
-func newTest(u User, c []Card) Test {
-	return Test{
-		User:  getFullName(u),
-		Cards: c,
-	}
-}
-
 func newOption(id int, text string) Option {
 	var o Option
 	o.Id = id
@@ -223,54 +61,6 @@ func newCard(id int, question string, opts []Option) Card {
 	c.Options = opts
 	return c
 
-}
-
-func removeAppendixPrefix(ap []string) []string {
-	if ap == nil {
-		return ap
-	}
-	var result []string
-	for _, s := range ap {
-		_, j := utf8.DecodeRuneInString(s)
-		// result[i] = s[(j * 3):]
-		result = append(result, s[(j*3):])
-	}
-	return result
-}
-
-func newCardsResult(vals url.Values) TestResult {
-	var tr TestResult
-	tr.UserId = 1
-	for k := range vals {
-		var r Result
-		// cr[k] = vals[k]
-		qId, _ := strings.CutPrefix(k, "question_")
-		var aIds []string
-		for _, aId := range vals[k] {
-			aIds = append(aIds, aId)
-		}
-		r.QuestionId = qId
-		r.AnswerIds = aIds
-		tr.Results = append(tr.Results, r)
-	}
-	return tr
-}
-
-func getData(url string) (m message, err error) {
-	resp, err := http.Get(url)
-	if err != nil {
-		log.Printf("getUrl http.Get() error: %v", err)
-	}
-	defer resp.Body.Close()
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		log.Printf("getUrl io.ReadAll() error: %v", err)
-	}
-	if json.Valid(body) {
-		return body, nil
-	}
-	err = errors.New("not a valid json")
-	return message{}, err
 }
 
 func getPostJson(c Credentials, url string) (j message) {
@@ -324,23 +114,6 @@ func getRestBlock(c Credentials) (rbs restBlocks) {
 	return rbs
 }
 
-func getCards(rbs restBlocks) (cards []Card) {
-	for _, block := range rbs {
-		var c Card
-		c.Id = block.Id
-		c.Question = block.Task_text
-		c.Appendix = removeAppendixPrefix(block.Task_appendix)
-		for _, o := range block.Answers {
-			c.Options = append(
-				c.Options,
-				newOption(o.Id, o.Answer_text),
-			)
-		}
-		cards = append(cards, c)
-	}
-	return cards
-}
-
 func jsonHandler(w http.ResponseWriter, r *http.Request) {
 	data, err := json.Marshal(users[1].auth)
 	if err != nil {
@@ -388,7 +161,7 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 func signInHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
-		http.ServeFile(w, r, "login.html")
+		http.ServeFile(w, r, "templates/login.html")
 	case "POST":
 		if err := r.ParseForm(); err != nil {
 			log.Fatalf("ParseForm() err: %v", err)
@@ -427,18 +200,6 @@ func readCreds(f url.Values) Credentials {
 	}
 }
 
-func getUserCreds(id int) Credentials {
-	return users[id-1].auth
-}
-
-func getUserById(id int) User {
-	return users[id-1]
-}
-
-func getFullName(u User) string {
-	return fmt.Sprintf("%s %s %s", u.surname, u.name, u.middlename)
-}
-
 func getSession(u User) session {
 	for uuid := range sessions {
 		s := sessions[uuid]
@@ -446,16 +207,6 @@ func getSession(u User) session {
 		return s
 	}
 	return session{}
-}
-
-func getUserByEmail(e string) (user User, err error) {
-	for _, u := range users {
-		if e == u.auth.Email {
-			return u, nil
-		}
-	}
-	err = errors.New("User not found")
-	return User{}, err
 }
 
 func makeHandler(fn func(http.ResponseWriter, *http.Request, Test)) http.HandlerFunc {
