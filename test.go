@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/url"
+	"strconv"
 	"strings"
 	"unicode/utf8"
 )
@@ -19,7 +20,7 @@ type Card struct {
 }
 
 type Test struct {
-	User  string
+	User  User
 	Cards []Card
 }
 
@@ -52,27 +53,61 @@ type restBlock struct {
 
 type restBlocks []restBlock
 
-func newCardsResult(vals url.Values) TestResult {
-	var tr TestResult
-	tr.UserId = 1
-	for k := range vals {
-		var r Result
-		// cr[k] = vals[k]
-		qId, _ := strings.CutPrefix(k, "question_")
-		var aIds []string
-		for _, aId := range vals[k] {
-			aIds = append(aIds, aId)
-		}
-		r.QuestionId = qId
-		r.AnswerIds = aIds
-		tr.Results = append(tr.Results, r)
+type finishTest struct {
+	RetCode int `json:"RetCode"`
+}
+
+func flattenMap(vals url.Values) (m map[string]string) {
+	m = make(map[string]string)
+	for k, v := range vals {
+		m[k] = v[0]
 	}
-	return tr
+	return m
+}
+
+func (tr TestResult) indexOf(id string) (index int, found bool) {
+	index = -1
+	for i := 0; i < len(tr.Results); i++ {
+		if id == tr.Results[i].QuestionId {
+			found = true
+			index = i
+			break
+		}
+	}
+	return
+}
+
+func newCardsResult(vals url.Values) (tr TestResult, err error) {
+	m := flattenMap(vals)
+	tr.UserId, err = strconv.Atoi(m["userId"])
+	if err != nil {
+		return tr, err
+	}
+	for k, v := range m {
+		var r Result
+		if strings.Contains(k, "answer_on_question_") {
+			r.QuestionId, _ = strings.CutPrefix(k, "answer_on_question_")
+			r.AnswerIds = append(r.AnswerIds, v)
+			i, found := tr.indexOf(r.QuestionId)
+			if found {
+				tr.Results[i].AnswerIds = append(tr.Results[i].AnswerIds, v)
+			} else {
+				tr.Results = append(tr.Results, r)
+			}
+		} else if strings.Contains(k, "_id") {
+			r.QuestionId = v
+			_, found := tr.indexOf(r.QuestionId)
+			if !found {
+				tr.Results = append(tr.Results, r)
+			}
+		}
+	}
+	return tr, err
 }
 
 func newTest(u User, c []Card) Test {
 	return Test{
-		User:  getFullName(u),
+		User:  u,
 		Cards: c,
 	}
 }

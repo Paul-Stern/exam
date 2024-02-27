@@ -11,7 +11,7 @@ type Credentials struct {
 }
 
 type User struct {
-	id         int
+	Id         int
 	name       string
 	middlename string
 	surname    string
@@ -22,7 +22,7 @@ type Users []User
 
 var users = Users{
 	User{
-		id:         1,
+		Id:         1,
 		name:       "Евгений",
 		middlename: "Семенович",
 		surname:    "Коновалов",
@@ -32,7 +32,7 @@ var users = Users{
 		},
 	},
 	User{
-		id:         2,
+		Id:         2,
 		name:       "Юлиан",
 		middlename: "Петрович",
 		surname:    "Костоправ",
@@ -42,7 +42,7 @@ var users = Users{
 		},
 	},
 	User{
-		id:         3,
+		Id:         3,
 		name:       "Герман",
 		middlename: "Станиславович",
 		surname:    "Кривонос",
@@ -61,7 +61,7 @@ func getUserCreds(id int) Credentials {
 	return users[id-1].auth
 }
 
-func getFullName(u User) string {
+func (u User) getFullName() string {
 	return fmt.Sprintf("%s %s %s", u.surname, u.name, u.middlename)
 }
 

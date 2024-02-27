@@ -27,9 +27,13 @@ type message []byte
 
 var sessions = map[string]session{}
 
-var templates = template.Must(template.ParseFiles("templates/test.html"))
-
 var cfg Config
+
+var funcMap = template.FuncMap{
+	"getFullName": User.getFullName,
+}
+
+var templates = template.Must(template.New("test").Funcs(funcMap).ParseFiles("templates/test.html"))
 
 func main() {
 	readConf(&cfg)
@@ -134,13 +138,11 @@ func viewHandler(w http.ResponseWriter, r *http.Request, t Test) {
 		}
 		f := r.PostForm
 		log.Printf("%s", f)
-		// cr := newCardResult(f)
-		// w.Header().Add("Content-Type", "application/json")
-		tr := newCardsResult(f)
+		tr, err := newCardsResult(f)
+		if err != nil {
+			log.Printf("post error: %v", err)
+		}
 		log.Printf("%s", tr)
-		// if err != nil {
-		// 	log.Printf("post error: %v", err)
-		// }
 		r := sendPostJson(tr, getSaveUrl(cfg))
 		got, err := io.ReadAll(r.Body)
 
@@ -149,9 +151,6 @@ func viewHandler(w http.ResponseWriter, r *http.Request, t Test) {
 			log.Fatalf("post error: %v", err)
 		}
 		fmt.Fprintf(w, "%s", got)
-
-		// log.Println(f)
-		// http.Redirect(w, r, "/login", http.StatusFound)
 	}
 }
 func postHandler(w http.ResponseWriter, r *http.Request) {
