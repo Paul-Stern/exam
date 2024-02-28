@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"html/template"
 	"io"
 	"log"
 	"net/http"
@@ -29,14 +28,9 @@ var sessions = map[string]session{}
 
 var cfg Config
 
-var funcMap = template.FuncMap{
-	"getFullName": User.getFullName,
-}
-
-var templates = template.Must(template.New("test").Funcs(funcMap).ParseFiles("templates/test.html"))
-
 func main() {
 	readConf(&cfg)
+	LoadTemplates()
 
 	http.HandleFunc("/test", makeHandler(viewHandler))
 	http.HandleFunc("/login", signInHandler)
@@ -164,7 +158,7 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 func signInHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
-		http.ServeFile(w, r, "templates/login.html")
+		http.ServeFile(w, r, "static/login.html")
 	case "POST":
 		if err := r.ParseForm(); err != nil {
 			log.Fatalf("ParseForm() err: %v", err)
@@ -224,12 +218,5 @@ func makeHandler(fn func(http.ResponseWriter, *http.Request, Test)) http.Handler
 			t = newTest(u, c)
 		}
 		fn(w, r, t)
-	}
-}
-
-func renderTemplate(w http.ResponseWriter, tmpl string, t *Test) {
-	err := templates.ExecuteTemplate(w, tmpl+".html", t)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
