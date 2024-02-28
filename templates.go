@@ -17,16 +17,11 @@ var (
 	//go:embed templates/*
 	files     embed.FS
 	templates map[string]*template.Template
-	// templates = template.Must(template.New("test").Funcs(funcMap).ParseFiles("templates/test.html"))
-	// // go:embed templates/test.html
+
 	funcMap = template.FuncMap{
 		"getFullName": User.getFullName,
 	}
 )
-
-// var funcMap = template.FuncMap{
-// 	"getFullName": User.getFullName,
-// }
 
 func LoadTemplates() error {
 	if templates == nil {

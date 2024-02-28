@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	_ "embed"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -28,12 +29,17 @@ var sessions = map[string]session{}
 
 var cfg Config
 
+//go:embed static/login.html
+var loginPage string
+
 func main() {
 	readConf(&cfg)
 	err := LoadTemplates()
 	if err != nil {
 		log.Fatalf("LoadTemplates error: %v", err)
 	}
+
+	// http.Handle("/", http.FileServer(http.FS(loginFS)))
 
 	http.HandleFunc("/test", makeHandler(viewHandler))
 	http.HandleFunc("/login", signInHandler)
@@ -161,7 +167,7 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 func signInHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
-		http.ServeFile(w, r, "static/login.html")
+		fmt.Fprint(w, loginPage)
 	case "POST":
 		if err := r.ParseForm(); err != nil {
 			log.Fatalf("ParseForm() err: %v", err)
