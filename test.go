@@ -67,8 +67,8 @@ func flattenMap(vals url.Values) (m map[string]int) {
 
 func (tr TestResult) indexOf(id int) (index int, found bool) {
 	index = -1
-	for i := 0; i < len(tr.Results); i++ {
-		if id == tr.Results[i].QuestionId {
+	for i, v := range tr.Results {
+		if id == v.QuestionId {
 			found = true
 			index = i
 			break
