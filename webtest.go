@@ -30,7 +30,10 @@ var cfg Config
 
 func main() {
 	readConf(&cfg)
-	LoadTemplates()
+	err := LoadTemplates()
+	if err != nil {
+		log.Fatalf("LoadTemplates error: %v", err)
+	}
 
 	http.HandleFunc("/test", makeHandler(viewHandler))
 	http.HandleFunc("/login", signInHandler)

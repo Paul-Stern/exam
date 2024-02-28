@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"log"
 	"net/http"
+	"strings"
 )
 
 const (
@@ -41,7 +42,13 @@ func LoadTemplates() error {
 			continue
 		}
 
-		pt, err := template.New("test").Funcs(funcMap).ParseFS(files, templatesDir+"/"+tmpl.Name())
+		t := template.New(tmpl.Name())
+
+		if strings.Contains(t.Name(), "test.html") {
+			t.Funcs(funcMap)
+		}
+
+		pt, err := t.ParseFS(files, templatesDir+"/"+tmpl.Name())
 		if err != nil {
 			return err
 		}
