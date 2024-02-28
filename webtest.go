@@ -145,7 +145,7 @@ func viewHandler(w http.ResponseWriter, r *http.Request, t Test) {
 		if err != nil {
 			log.Printf("post error: %v", err)
 		}
-		log.Printf("%s", tr)
+		log.Printf("%v", tr)
 		r := sendPostJson(tr, getSaveUrl(cfg))
 		got, err := io.ReadAll(r.Body)
 
