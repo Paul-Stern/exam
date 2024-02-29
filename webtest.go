@@ -207,6 +207,20 @@ func signUpHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
 		fmt.Fprint(w, signupPage)
+	case "POST":
+		if err := r.ParseForm(); err != nil {
+			log.Printf("ParseForm() err: %v", err)
+			return
+		}
+
+		u := newUser(
+			r.Form["name"][0],
+			r.Form["middlename"][0],
+			r.Form["surname"][0],
+			r.Form["email"][0],
+			r.Form["password"][0])
+		fmt.Fprintf(w, "%v", u)
+
 	}
 }
 

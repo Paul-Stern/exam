@@ -11,11 +11,11 @@ type Credentials struct {
 }
 
 type User struct {
-	Id         int    `json:"PERSINFO_ID"`
-	Name       string `json:"FIRSTNAME"`
-	Middlename string `json:"MIDDLENAME"`
-	Surname    string `json:"LASTNAME"`
-	Auth       Credentials
+	Id         int         `json:"PERSINFO_ID"`
+	Name       string      `json:"FIRSTNAME"`
+	Middlename string      `json:"MIDDLENAME"`
+	Surname    string      `json:"LASTNAME"`
+	Auth       Credentials `json:"CREDENTIALS"`
 }
 
 type Users []User
@@ -63,6 +63,18 @@ func getUserCreds(id int) Credentials {
 
 func (u User) getFullName() string {
 	return fmt.Sprintf("%s %s %s", u.Surname, u.Name, u.Middlename)
+}
+
+func newUser(name, mname, surname, email, password string) (u User) {
+	return User{
+		Name:       name,
+		Middlename: mname,
+		Surname:    surname,
+		Auth: Credentials{
+			Email:    email,
+			Password: password,
+		},
+	}
 }
 
 func getUserByEmail(e string) (user User, err error) {
