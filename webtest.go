@@ -32,6 +32,9 @@ var cfg Config
 //go:embed static/login.html
 var loginPage string
 
+//go:embed static/signup.html
+var signupPage string
+
 func main() {
 	readConf(&cfg)
 	err := LoadTemplates()
@@ -43,6 +46,7 @@ func main() {
 
 	http.HandleFunc("/test", makeHandler(viewHandler))
 	http.HandleFunc("/login", signInHandler)
+	http.HandleFunc("/signup", signUpHandler)
 	http.HandleFunc("/json", jsonHandler)
 	// Helps to test getting answers over post
 	http.HandleFunc("/post", postHandler)
@@ -196,6 +200,13 @@ func signInHandler(w http.ResponseWriter, r *http.Request) {
 			log.Printf("Login: %v\n", err)
 			http.Redirect(w, r, "/login", http.StatusFound)
 		}
+	}
+}
+
+func signUpHandler(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "GET":
+		fmt.Fprint(w, signupPage)
 	}
 }
 
