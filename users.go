@@ -11,11 +11,11 @@ type Credentials struct {
 }
 
 type User struct {
-	Id         int
-	name       string
-	middlename string
-	surname    string
-	auth       Credentials
+	Id         int    `json:"PERSINFO_ID"`
+	Name       string `json:"FIRSTNAME"`
+	Middlename string `json:"MIDDLENAME"`
+	Surname    string `json:"LASTNAME"`
+	Auth       Credentials
 }
 
 type Users []User
@@ -23,30 +23,30 @@ type Users []User
 var users = Users{
 	User{
 		Id:         1,
-		name:       "Евгений",
-		middlename: "Семенович",
-		surname:    "Коновалов",
-		auth: Credentials{
+		Name:       "Евгений",
+		Middlename: "Семенович",
+		Surname:    "Коновалов",
+		Auth: Credentials{
 			Email:    ***REMOVED***,
 			Password: ***REMOVED***,
 		},
 	},
 	User{
 		Id:         2,
-		name:       "Юлиан",
-		middlename: "Петрович",
-		surname:    "Костоправ",
-		auth: Credentials{
+		Name:       "Юлиан",
+		Middlename: "Петрович",
+		Surname:    "Костоправ",
+		Auth: Credentials{
 			Email:    ***REMOVED***,
 			Password: ***REMOVED***,
 		},
 	},
 	User{
 		Id:         3,
-		name:       "Герман",
-		middlename: "Станиславович",
-		surname:    "Кривонос",
-		auth: Credentials{
+		Name:       "Герман",
+		Middlename: "Станиславович",
+		Surname:    "Кривонос",
+		Auth: Credentials{
 			Email:    ***REMOVED***,
 			Password: ***REMOVED***,
 		},
@@ -58,16 +58,16 @@ func getUserById(id int) User {
 }
 
 func getUserCreds(id int) Credentials {
-	return users[id-1].auth
+	return users[id-1].Auth
 }
 
 func (u User) getFullName() string {
-	return fmt.Sprintf("%s %s %s", u.surname, u.name, u.middlename)
+	return fmt.Sprintf("%s %s %s", u.Surname, u.Name, u.Middlename)
 }
 
 func getUserByEmail(e string) (user User, err error) {
 	for _, u := range users {
-		if e == u.auth.Email {
+		if e == u.Auth.Email {
 			return u, nil
 		}
 	}

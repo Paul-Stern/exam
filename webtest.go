@@ -116,17 +116,17 @@ func sendPostJson(r TestResult, url string) *http.Response {
 	return res
 }
 
-func getRestBlock(c Credentials) (rbs restBlocks) {
+func getRestBlock(c Credentials) (tasks Tasks) {
 	got := getPostJson(c, getQuestionUrl(cfg))
-	err := json.Unmarshal(got, &rbs)
+	err := json.Unmarshal(got, &tasks)
 	if err != nil {
 		log.Fatalf("getRestBlock error: %v", err)
 	}
-	return rbs
+	return tasks
 }
 
 func jsonHandler(w http.ResponseWriter, r *http.Request) {
-	data, err := json.Marshal(users[1].auth)
+	data, err := json.Marshal(users[1].Auth)
 	if err != nil {
 		log.Printf("Json error: %v", err)
 	}
@@ -185,7 +185,7 @@ func signInHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Check if credentials are correct
-		if c == u.auth {
+		if c == u.Auth {
 			sessionToken := uuid.NewString()
 			expiresAt := time.Now().Add(2 * time.Hour)
 
@@ -234,7 +234,7 @@ func makeHandler(fn func(http.ResponseWriter, *http.Request, Test)) http.Handler
 			if err != nil {
 				log.Printf("Get current user error: %v", err)
 			}
-			c := getCards(getRestBlock(u.auth))
+			c := getCards(getRestBlock(u.Auth))
 			t = newTest(u, c)
 		}
 		fn(w, r, t)
