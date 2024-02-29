@@ -39,19 +39,29 @@ type CardsResult []struct {
 	AnswerIds  []int `json:"AnswerId"`
 }
 
-type restOpt struct {
+type TestPlan struct {
+	Id int
+}
+
+type TestProfile struct {
+	Id   int    `json:"id"`
+	Name string `json`
+	Test Test   `json`
+}
+
+type TaskOption struct {
 	Id          int    `json:"ID"`
 	Answer_text string `json:"ANSWER_TEXT"`
 }
 
-type restBlock struct {
-	Id            int       `json:"ID"`
-	Task_text     string    `json:"TASK_TEXT"`
-	Task_appendix []string  `json:"TASK_APPENDIX"`
-	Answers       []restOpt `json:"ANSWERS"`
+type Task struct {
+	Id            int          `json:"ID"`
+	Task_text     string       `json:"TASK_TEXT"`
+	Task_appendix []string     `json:"TASK_APPENDIX"`
+	Answers       []TaskOption `json:"ANSWERS"`
 }
 
-type restBlocks []restBlock
+type Tasks []Task
 
 type finishTest struct {
 	RetCode int `json:"RetCode"`
@@ -113,13 +123,13 @@ func newTest(u User, c []Card) Test {
 	}
 }
 
-func getCards(rbs restBlocks) (cards []Card) {
-	for _, block := range rbs {
+func getCards(tasks Tasks) (cards []Card) {
+	for _, task := range tasks {
 		var c Card
-		c.Id = block.Id
-		c.Question = block.Task_text
-		c.Appendix = removeAppendixPrefix(block.Task_appendix)
-		for _, o := range block.Answers {
+		c.Id = task.Id
+		c.Question = task.Task_text
+		c.Appendix = removeAppendixPrefix(task.Task_appendix)
+		for _, o := range task.Answers {
 			c.Options = append(
 				c.Options,
 				newOption(o.Id, o.Answer_text),
