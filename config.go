@@ -18,6 +18,7 @@ type Config struct {
 		Nodes struct {
 			GetQuestions    string `yaml:"getQuestions"`
 			SaveTestResults string `yaml:"saveTestResult"`
+			Register        string `yaml:"register"`
 		} `yaml:"nodes"`
 	} `yaml:"rest"`
 }
@@ -55,5 +56,16 @@ func getSaveUrl(cfg Config) string {
 		cfg.Rest.Port,
 		cfg.Rest.Rest,
 		cfg.Rest.Nodes.SaveTestResults,
+	}, "")
+}
+
+func getRegister(cfg Config) string {
+	return strings.Join([]string{
+		"http://",
+		cfg.Rest.Host,
+		":",
+		cfg.Rest.Port,
+		cfg.Rest.Rest,
+		cfg.Rest.Nodes.Register,
 	}, "")
 }

@@ -12,8 +12,6 @@ import (
 	"net/url"
 	"os"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 type Answer int
@@ -23,7 +21,17 @@ type session struct {
 	expiry time.Time
 }
 
-type message []byte
+type DataTypes interface {
+	User | Task
+}
+
+type Message[D DataTypes] struct {
+	Error struct {
+		Code int    `json:"CODE"`
+		Text string `json:"TEXT"`
+	} `json:"ERROR"`
+	Data D `json:"DATA"`
+}
 
 var sessions = map[string]session{}
 
@@ -74,10 +82,27 @@ func newCard(id int, question string, opts []Option) Card {
 
 }
 
-func getPostJson(c Credentials, url string) (j message) {
+func post(v any, url string) (*http.Response, error) {
+	out, err := json.Marshal(v)
+	if err != nil {
+		log.Printf("post error: %v", err)
+	}
+
+	resp, err := http.Post(
+		url,
+		"application/json",
+		bytes.NewBuffer(out),
+	)
+	if err != nil {
+		log.Printf("post error: %v", err)
+	}
+	return resp, err
+}
+
+func getPostJson(c Credentials, url string) []byte {
 	out, err := json.Marshal(c)
 	if err != nil {
-		log.Fatalf("post error: %v", err)
+		log.Printf("post error: %v", err)
 	}
 	resp, err := http.Post(
 		url,
@@ -85,12 +110,12 @@ func getPostJson(c Credentials, url string) (j message) {
 		bytes.NewBuffer(out),
 	)
 	if err != nil {
-		log.Fatalf("post error: %v", err)
+		log.Printf("post error: %v", err)
 	}
 	// Read body
 	got, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatalf("post error: %v", err)
+		log.Printf("post error: %v", err)
 	}
 	return got
 }
@@ -120,7 +145,7 @@ func getRestBlock(c Credentials) (tasks Tasks) {
 	got := getPostJson(c, getQuestionUrl(cfg))
 	err := json.Unmarshal(got, &tasks)
 	if err != nil {
-		log.Fatalf("getRestBlock error: %v", err)
+		log.Printf("getRestBlock error: %v", err)
 	}
 	return tasks
 }
@@ -178,28 +203,29 @@ func signInHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		c := readCreds(r.PostForm)
-		u, err := getUserByEmail(c.Email)
-		if err != nil {
-			log.Printf("getUserByEmail() err: %v", err)
-			http.Redirect(w, r, "/login", http.StatusFound)
-		}
+		fmt.Fprint(w, getRestBlock(c))
+		// u, err := getUserByEmail(c.Email)
+		// if err != nil {
+		// 	log.Printf("getUserByEmail() err: %v", err)
+		// 	http.Redirect(w, r, "/login", http.StatusFound)
+		// }
 
 		// Check if credentials are correct
-		if c == u.Auth {
-			sessionToken := uuid.NewString()
-			expiresAt := time.Now().Add(2 * time.Hour)
+		// if c == u.Auth {
+		// 	sessionToken := uuid.NewString()
+		// 	expiresAt := time.Now().Add(2 * time.Hour)
 
-			sessions[sessionToken] = session{
-				email:  c.Email,
-				expiry: expiresAt,
-			}
-			log.Println("Login: success. Redirecting...")
-			http.Redirect(w, r, "/test", http.StatusFound)
-		} else {
-			err = errors.New("wrong password")
-			log.Printf("Login: %v\n", err)
-			http.Redirect(w, r, "/login", http.StatusFound)
-		}
+		// 	sessions[sessionToken] = session{
+		// 		email:  c.Email,
+		// 		expiry: expiresAt,
+		// 	}
+		// 	log.Println("Login: success. Redirecting...")
+		// 	http.Redirect(w, r, "/test", http.StatusFound)
+		// } else {
+		// 	err = errors.New("wrong password")
+		// 	log.Printf("Login: %v\n", err)
+		// 	http.Redirect(w, r, "/login", http.StatusFound)
+		// }
 	}
 }
 
@@ -219,7 +245,12 @@ func signUpHandler(w http.ResponseWriter, r *http.Request) {
 			r.Form["surname"][0],
 			r.Form["email"][0],
 			r.Form["password"][0])
-		fmt.Fprintf(w, "%v", u)
+		// fmt.Fprintf(w, "%v", u)
+
+		r, _ := post(u, getRegister(cfg))
+		m, _ := read[User](r)
+		w.Header().Add("Content-Type", "application/json")
+		fmt.Fprintf(w, "%v", m)
 
 	}
 }
@@ -229,6 +260,21 @@ func readCreds(f url.Values) Credentials {
 		Email:    f["email"][0],
 		Password: f["password"][0],
 	}
+}
+
+func read[DT DataTypes](r *http.Response) (m Message[DT], err error) {
+	data, err := io.ReadAll(r.Body)
+	if err != nil {
+		return
+	}
+	err = json.Unmarshal(data, &m)
+	if err != nil {
+		return
+	}
+	if m.Error.Code == 0 {
+		err = nil
+	}
+	return
 }
 
 func getSession(u User) session {
