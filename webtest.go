@@ -249,8 +249,9 @@ func signUpHandler(w http.ResponseWriter, r *http.Request) {
 
 		r, _ := post(u, getRegister(cfg))
 		m, _ := read[User](r)
+		j, _ := json.Marshal(m)
 		w.Header().Add("Content-Type", "application/json")
-		fmt.Fprintf(w, "%v", m)
+		fmt.Fprintf(w, "%s", j)
 
 	}
 }
