@@ -43,6 +43,9 @@ var loginPage string
 //go:embed static/signup.html
 var signupPage string
 
+//go:embed static/successfulRegistration.html
+var successPage string
+
 func main() {
 	readConf(&cfg)
 	err := LoadTemplates()
@@ -55,6 +58,7 @@ func main() {
 	http.HandleFunc("/test", makeHandler(viewHandler))
 	http.HandleFunc("/login", signInHandler)
 	http.HandleFunc("/signup", signUpHandler)
+	http.HandleFunc("/success", successHandler)
 	http.HandleFunc("/json", jsonHandler)
 	// Helps to test getting answers over post
 	http.HandleFunc("/post", postHandler)
@@ -247,13 +251,20 @@ func signUpHandler(w http.ResponseWriter, r *http.Request) {
 			r.Form["password"][0])
 		// fmt.Fprintf(w, "%v", u)
 
-		r, _ := post(u, getRegister(cfg))
-		m, _ := read[User](r)
-		j, _ := json.Marshal(m)
-		w.Header().Add("Content-Type", "application/json")
-		fmt.Fprintf(w, "%s", j)
+		// Send registration data to REST server
+		resp, _ := post(u, getRegister(cfg))
+		// Parse response with user data from REST server
+		read[User](resp)
+		// j, _ := json.Marshal(m)
+		// w.Header().Add("Content-Type", "application/json")
+		// fmt.Fprintf(w, "%s", j)
+		http.Redirect(w, r, "/success", http.StatusFound)
 
 	}
+}
+
+func successHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(w, successPage)
 }
 
 func readCreds(f url.Values) Credentials {
