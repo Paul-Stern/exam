@@ -11,11 +11,11 @@ type Credentials struct {
 }
 
 type User struct {
-	Id         int         `json:"PERSINFO_ID"`
-	Name       string      `json:"FIRSTNAME"`
-	Middlename string      `json:"MIDDLENAME"`
-	Surname    string      `json:"LASTNAME"`
-	Auth       Credentials `json:"CREDENTIALS"`
+	Id         int         `json:"PERSINFO_ID,omitempty"`
+	Name       string      `json:"FIRSTNAME,omitempty"`
+	Middlename string      `json:"MIDDLENAME,omitempty"`
+	Surname    string      `json:"LASTNAME,omitempty"`
+	Auth       Credentials `json:"CREDENTIALS,omitempty"`
 }
 
 type Users []User
@@ -85,4 +85,19 @@ func getUserByEmail(e string) (user User, err error) {
 	}
 	err = errors.New("User not found")
 	return User{}, err
+}
+
+func getUser(email string) (u User, err error) {
+	u.Auth.Email = email
+	resp, err := post(u, "")
+	if err != nil {
+		return
+	}
+	message, err := read[User](resp)
+	if err != nil {
+		return
+	}
+	u = message.Data
+	return
+
 }

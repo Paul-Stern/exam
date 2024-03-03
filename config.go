@@ -19,6 +19,8 @@ type Config struct {
 			GetQuestions    string `yaml:"getQuestions"`
 			SaveTestResults string `yaml:"saveTestResult"`
 			Register        string `yaml:"register"`
+			User            string `yaml:"User"`
+			Authenticate    string `yaml:"Authenticate"`
 		} `yaml:"nodes"`
 	} `yaml:"rest"`
 }
@@ -45,6 +47,17 @@ func getQuestionUrl(cfg Config) string {
 		cfg.Rest.Port,
 		cfg.Rest.Rest,
 		cfg.Rest.Nodes.GetQuestions,
+	}, "")
+}
+
+func getAuthenticateUrl(cfg Config) string {
+	return strings.Join([]string{
+		"http://",
+		cfg.Rest.Host,
+		":",
+		cfg.Rest.Port,
+		cfg.Rest.Rest,
+		cfg.Rest.Nodes.Authenticate,
 	}, "")
 }
 

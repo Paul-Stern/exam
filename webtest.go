@@ -12,17 +12,19 @@ import (
 	"net/url"
 	"os"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type Answer int
 
 type session struct {
-	email  string
+	user   User
 	expiry time.Time
 }
 
 type DataTypes interface {
-	User | Task
+	User | Tasks | TestProfile | []TestProfile
 }
 
 type Message[D DataTypes] struct {
@@ -53,9 +55,7 @@ func main() {
 		log.Fatalf("LoadTemplates error: %v", err)
 	}
 
-	// http.Handle("/", http.FileServer(http.FS(loginFS)))
-
-	http.HandleFunc("/test", makeHandler(viewHandler))
+	http.HandleFunc("/test", testHandler)
 	http.HandleFunc("/login", signInHandler)
 	http.HandleFunc("/signup", signUpHandler)
 	http.HandleFunc("/success", successHandler)
@@ -163,9 +163,17 @@ func jsonHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "%s", data)
 }
 
-func viewHandler(w http.ResponseWriter, r *http.Request, t Test) {
+func testHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
+		var t Test
+		// get user from cookie
+		cookie, _ := r.Cookie("Session id")
+		u := sessions[cookie.Value].user
+		// get tasks
+		tasks, _ := getTasks(u)
+		c := getCards(tasks)
+		t = newTest(u, c)
 		renderTemplate(w, "test", &t)
 	case "POST":
 		if err := r.ParseForm(); err != nil {
@@ -207,29 +215,38 @@ func signInHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		c := readCreds(r.PostForm)
-		fmt.Fprint(w, getRestBlock(c))
-		// u, err := getUserByEmail(c.Email)
-		// if err != nil {
-		// 	log.Printf("getUserByEmail() err: %v", err)
-		// 	http.Redirect(w, r, "/login", http.StatusFound)
-		// }
+		u := User{}
+		u.Auth.Email = c.Email
+		u.Auth.Password = c.Password
+		resp, err := post(u, getAuthenticateUrl(cfg))
+		if err != nil {
+			return
+		}
+		// Check if credentials are correct on REST server
+		m, err := read[User](resp)
+		if m.Error.Code != 0 {
+			return
+		}
+		u = m.Data
 
-		// Check if credentials are correct
-		// if c == u.Auth {
-		// 	sessionToken := uuid.NewString()
-		// 	expiresAt := time.Now().Add(2 * time.Hour)
+		if err != nil {
+			return
+		}
 
-		// 	sessions[sessionToken] = session{
-		// 		email:  c.Email,
-		// 		expiry: expiresAt,
-		// 	}
-		// 	log.Println("Login: success. Redirecting...")
-		// 	http.Redirect(w, r, "/test", http.StatusFound)
-		// } else {
-		// 	err = errors.New("wrong password")
-		// 	log.Printf("Login: %v\n", err)
-		// 	http.Redirect(w, r, "/login", http.StatusFound)
-		// }
+		sessionToken := uuid.NewString()
+		expiresAt := time.Now().Add(2 * time.Hour)
+
+		// save data to session
+		sessions[sessionToken] = session{
+			user:   u,
+			expiry: expiresAt,
+		}
+		cookie := http.Cookie{}
+		cookie.Name = "Session id"
+		cookie.Value = sessionToken
+		http.SetCookie(w, &cookie)
+		log.Println("Login: success. Redirecting...")
+		http.Redirect(w, r, "/test", http.StatusFound)
 	}
 }
 
@@ -267,6 +284,19 @@ func successHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, successPage)
 }
 
+func getTasks(u User) (tasks Tasks, err error) {
+	resp, err := post(u, getQuestionUrl(cfg))
+	if err != nil {
+		return
+	}
+	m, err := read[Tasks](resp)
+	if err != nil {
+		return
+	}
+	tasks = m.Data
+	return
+}
+
 func readCreds(f url.Values) Credentials {
 	return Credentials{
 		Email:    f["email"][0],
@@ -287,28 +317,4 @@ func read[DT DataTypes](r *http.Response) (m Message[DT], err error) {
 		err = nil
 	}
 	return
-}
-
-func getSession(u User) session {
-	for uuid := range sessions {
-		s := sessions[uuid]
-		log.Printf("%v\n", s.email)
-		return s
-	}
-	return session{}
-}
-
-func makeHandler(fn func(http.ResponseWriter, *http.Request, Test)) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var t Test
-		for _, s := range sessions {
-			u, err := getUserByEmail(s.email)
-			if err != nil {
-				log.Printf("Get current user error: %v", err)
-			}
-			c := getCards(getRestBlock(u.Auth))
-			t = newTest(u, c)
-		}
-		fn(w, r, t)
-	}
 }

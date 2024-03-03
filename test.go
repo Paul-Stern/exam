@@ -44,9 +44,8 @@ type TestPlan struct {
 }
 
 type TestProfile struct {
-	Id   int    `json:"id"`
-	Name string `json`
-	Test Test   `json`
+	Id   int    `json:"TEST_PROFILE_ID"`
+	Text string `json:"TEST_PROFILE_TEXT"`
 }
 
 type TaskOption struct {
