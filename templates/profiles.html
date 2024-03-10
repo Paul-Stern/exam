@@ -10,7 +10,7 @@
             crossorigin="anonymous">
 </head>
 <body>
-    <form action="/choose" method="post">
+    <form action="/profiles" method="post">
         {{range $i, $p := .Profiles}}
         <input type="radio" name="TASK_PROFILE_ID" id="" value="{{$p.Id}}"> <span>{{$p.Text}}</span>
         {{end}}

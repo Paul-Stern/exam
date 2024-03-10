@@ -51,7 +51,11 @@ type AvailableTestProfiles struct {
 
 type TestProfile struct {
 	Id   int    `json:"TASK_PROFILE_ID"`
-	Text string `json:"TASK_PROFILE_TEXT"`
+	Text string `json:"TASK_PROFILE_NAME"`
+}
+
+type Profiles struct {
+	Profiles []TestProfile `json:"TASK_PROFILES"`
 }
 
 type TaskOption struct {

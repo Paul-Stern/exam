@@ -24,7 +24,7 @@ type session struct {
 }
 
 type DataTypes interface {
-	User | Tasks | TestProfile | []TestProfile | AvailableTestProfiles
+	User | Tasks | TestProfile | []TestProfile | AvailableTestProfiles | Profiles
 }
 
 type Message[D DataTypes] struct {
@@ -279,13 +279,13 @@ func signUpHandler(w http.ResponseWriter, r *http.Request) {
 
 func profilesHandler(w http.ResponseWriter, r *http.Request) {
 	// get user from cookie
-	cookie, _ := r.Cookie("gosesid")
-	u := sessions[cookie.Value].user
+	// cookie, _ := r.Cookie("gosesid")
+	// u := sessions[cookie.Value].user
 
 	switch r.Method {
 	case http.MethodGet:
 		// get tasks
-		profiles, _ := getProfiles(u)
+		profiles, _ := getProfiles()
 		renderTemplate(w, "profiles", &profiles)
 	case http.MethodPost:
 
@@ -317,18 +317,18 @@ func getTasks(prof AvailableTestProfiles) (tasks Tasks, err error) {
 	return
 }
 
-func getProfiles(u User) (profiles AvailableTestProfiles, err error) {
-	resp, err := post(u, getQuestionUrl(cfg))
+func getProfiles() (profiles Profiles, err error) {
+	url := baseUrl(cfg) + "/profiles"
+	resp, err := http.Get(url)
 	if err != nil {
 		return
 	}
-	m, err := read[AvailableTestProfiles](resp)
+	m, err := read[Profiles](resp)
 	if err != nil {
 		return
 	}
 	profiles = m.Data
 	return
-
 }
 
 func readCreds(f url.Values) Credentials {
