@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -167,15 +168,18 @@ func jsonHandler(w http.ResponseWriter, r *http.Request) {
 func testHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
-		// var t Test
-		// get user from cookie
-		// cookie, _ := r.Cookie("Session id")
-		// u := sessions[cookie.Value].user
-		// // get tasks
-		// tasks, _ := getTasks(u)
-		// c := getCards(tasks)
-		// t = newTest(u, c)
-		// renderTemplate(w, "test", &t)
+		var t Test
+		// get session from cookie
+		sesid, _ := r.Cookie("gosesid")
+		// get user from session
+		u := sessions[sesid.Value].user
+		log.Println(sessions[sesid.Value])
+		profid, _ := r.Cookie("profid")
+		// get tasks
+		tasks, _ := getTasks(profid.Value)
+		c := getCards(tasks)
+		t = newTest(u, c)
+		renderTemplate(w, "test", &t)
 	case "POST":
 		if err := r.ParseForm(); err != nil {
 			log.Printf("ParseForm() err: %v", err)
@@ -278,8 +282,8 @@ func signUpHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func profilesHandler(w http.ResponseWriter, r *http.Request) {
-	// get user from cookie
-	// cookie, _ := r.Cookie("gosesid")
+	// Get session id from cookie
+	sesid, _ := r.Cookie("gosesid")
 	// u := sessions[cookie.Value].user
 
 	switch r.Method {
@@ -288,6 +292,21 @@ func profilesHandler(w http.ResponseWriter, r *http.Request) {
 		profiles, _ := getProfiles()
 		renderTemplate(w, "profiles", &profiles)
 	case http.MethodPost:
+		if err := r.ParseForm(); err != nil {
+			log.Printf("ParseForm() err: %v", err)
+			return
+		}
+		// fmt.Fprintf(w, "%v", r.Form)
+		profId := http.Cookie{
+			Name:  "profid",
+			Value: r.FormValue("TASK_PROFILE_ID"),
+			Path:  "/test",
+		}
+		sesid.Path = "/test"
+		http.SetCookie(w, sesid)
+		http.SetCookie(w, &profId)
+		http.Redirect(w, r, "/test", http.StatusFound)
+		// tasks, err := getTasks(r.FormValue("TASK_PROFILE_ID"))
 
 	}
 
@@ -312,8 +331,24 @@ func successHandler(w http.ResponseWriter, r *http.Request) {
 	}
 */
 
-func getTasks(prof AvailableTestProfiles) (tasks Tasks, err error) {
+func getTasks(profileId string) (tasks Tasks, err error) {
 	// resp, err := post(prof, "")
+	// url := baseUrl(cfg) + "/profiles/" + profileId + "/tasks"
+	url := strings.Join([]string{
+		baseUrl(cfg),
+		"profiles",
+		profileId,
+		"tasks",
+	}, "/")
+	resp, err := http.Get(url)
+	if err != nil {
+		return
+	}
+	m, err := read[Tasks](resp)
+	if err != nil {
+		return
+	}
+	tasks = m.Data
 	return
 }
 

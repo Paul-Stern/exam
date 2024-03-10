@@ -70,7 +70,9 @@ type Task struct {
 	Answers       []TaskOption `json:"ANSWERS"`
 }
 
-type Tasks []Task
+type Tasks struct {
+	Tasks []Task `json:"QUESTIONS"`
+}
 
 type finishTest struct {
 	RetCode int `json:"RetCode"`
@@ -133,7 +135,7 @@ func newTest(u User, c []Card) Test {
 }
 
 func getCards(tasks Tasks) (cards []Card) {
-	for _, task := range tasks {
+	for _, task := range tasks.Tasks {
 		var c Card
 		c.Id = task.Id
 		c.Question = task.Task_text
