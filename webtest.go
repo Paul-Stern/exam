@@ -54,12 +54,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("LoadTemplates error: %v", err)
 	}
-	fmt.Println(getAuthenticateUrl(cfg))
 
 	http.HandleFunc("/test", testHandler)
 	http.HandleFunc("/login", signInHandler)
 	http.HandleFunc("/signup", signUpHandler)
-	http.HandleFunc("/choose", chooseHandler)
+	http.HandleFunc("/profiles", profilesHandler)
 	http.HandleFunc("/success", successHandler)
 	http.HandleFunc("/json", jsonHandler)
 	// Helps to test getting answers over post
@@ -216,22 +215,17 @@ func signInHandler(w http.ResponseWriter, r *http.Request) {
 			log.Fatalf("ParseForm() err: %v", err)
 		}
 
+		// Read credentials from form
 		c := readCreds(r.PostForm)
-		u := User{}
-		u.Auth.Email = c.Email
-		u.Auth.Password = c.Password
-		resp, err := post(u, getAuthenticateUrl(cfg))
+		// Get user by from REST server
+		u, err := getUser(c.Email)
 		if err != nil {
 			return
 		}
-		// Check if credentials are correct on REST server
-		m, err := read[User](resp)
-		if m.Error.Code != 0 {
-			return
-		}
-		u = m.Data
-
-		if err != nil {
+		// Check password
+		if c.Password != u.Auth.Password {
+			log.Println("login/password not correct")
+			http.Redirect(w, r, "/login", http.StatusFound)
 			return
 		}
 
@@ -246,10 +240,10 @@ func signInHandler(w http.ResponseWriter, r *http.Request) {
 		cookie := http.Cookie{}
 		cookie.Name = "gosesid"
 		cookie.Value = sessionToken
-		cookie.Path = "/choose"
+		cookie.Path = "/profiles"
 		http.SetCookie(w, &cookie)
 		log.Println("Login: success. Redirecting...")
-		http.Redirect(w, r, "/choose", http.StatusFound)
+		http.Redirect(w, r, "/profiles", http.StatusFound)
 	}
 }
 
@@ -283,13 +277,19 @@ func signUpHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func chooseHandler(w http.ResponseWriter, r *http.Request) {
+func profilesHandler(w http.ResponseWriter, r *http.Request) {
 	// get user from cookie
 	cookie, _ := r.Cookie("gosesid")
 	u := sessions[cookie.Value].user
-	// get tasks
-	profiles, _ := getProfiles(u)
-	renderTemplate(w, "choose", &profiles)
+
+	switch r.Method {
+	case http.MethodGet:
+		// get tasks
+		profiles, _ := getProfiles(u)
+		renderTemplate(w, "profiles", &profiles)
+	case http.MethodPost:
+
+	}
 
 }
 

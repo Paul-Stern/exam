@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"net/http"
 )
 
 type Credentials struct {
@@ -89,7 +90,9 @@ func getUserByEmail(e string) (user User, err error) {
 
 func getUser(email string) (u User, err error) {
 	u.Auth.Email = email
-	resp, err := post(u, "")
+	query := "?email=" + email
+	url := baseUrl(cfg) + "/persons" + query
+	resp, err := http.Get(url)
 	if err != nil {
 		return
 	}
