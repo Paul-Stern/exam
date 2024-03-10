@@ -48,7 +48,7 @@ func getAuthenticateUrl(cfg Config) string {
 }
 
 func getSaveUrl(cfg Config) string {
-	return baseUrl(cfg) + cfg.Rest.Nodes.SaveTestResults
+	return baseUrl(cfg) + "/" + cfg.Rest.Nodes.SaveTestResults
 }
 
 func getRegister(cfg Config) string {

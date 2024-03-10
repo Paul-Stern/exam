@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -22,6 +23,7 @@ type Answer int
 type session struct {
 	user   User
 	expiry time.Time
+	start  time.Time
 }
 
 type DataTypes interface {
@@ -55,6 +57,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("LoadTemplates error: %v", err)
 	}
+	log.Println(getSaveUrl(cfg))
 
 	http.HandleFunc("/test", testHandler)
 	http.HandleFunc("/login", signInHandler)
@@ -178,7 +181,13 @@ func testHandler(w http.ResponseWriter, r *http.Request) {
 		// get tasks
 		tasks, _ := getTasks(profid.Value)
 		c := getCards(tasks)
-		t = newTest(u, c)
+		pid, _ := strconv.Atoi(profid.Value)
+		t = newTest(u, c, pid)
+		http.SetCookie(w, &http.Cookie{
+			Name:  "testing_start",
+			Value: t.Time.Start.Format(time.RFC3339),
+		})
+		// http.SetCookie(w, profid)
 		renderTemplate(w, "test", &t)
 	case "POST":
 		if err := r.ParseForm(); err != nil {
@@ -191,8 +200,15 @@ func testHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Printf("post error: %v", err)
 		}
+		testStart, _ := r.Cookie("testing_start")
+		tr.Time.Start, err = time.Parse(time.RFC3339, testStart.Value)
+		if err != nil {
+			log.Printf("post error: %v", err)
+		}
 		log.Printf("%v", tr)
-		r := sendPostJson(tr, getSaveUrl(cfg))
+		url := baseUrl(cfg) + "/" + "tests"
+		// r := sendPostJson(tr, getSaveUrl(cfg))
+		r := sendPostJson(tr, url)
 		got, err := io.ReadAll(r.Body)
 
 		w.Header().Add("Content-Type", "application/json")
@@ -332,8 +348,6 @@ func successHandler(w http.ResponseWriter, r *http.Request) {
 */
 
 func getTasks(profileId string) (tasks Tasks, err error) {
-	// resp, err := post(prof, "")
-	// url := baseUrl(cfg) + "/profiles/" + profileId + "/tasks"
 	url := strings.Join([]string{
 		baseUrl(cfg),
 		"profiles",

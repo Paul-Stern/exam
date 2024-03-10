@@ -22,6 +22,7 @@
         <h4 class="text-secondary">Тестирование по теме "Общая эрудиция"</h4>
         <h6 class="text-secondary">Работник: {{getFullName .User}}</h6>
         <form action="/test" method="post" class="mb-5">
+            <input type="hidden" name="profile_id" value="{{.Profile.Id}}">
             <input type="hidden" name="userId" value="{{.User.Id}}">
             {{range $i, $card := .Cards}}
             <div class="js-card{{if eq $i 0}} js-current{{else}} d-none{{end}} mb-5">

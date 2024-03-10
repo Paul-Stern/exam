@@ -16,6 +16,7 @@ type User struct {
 	Name       string      `json:"FIRSTNAME,omitempty"`
 	Middlename string      `json:"MIDDLENAME,omitempty"`
 	Surname    string      `json:"LASTNAME,omitempty"`
+	Sex        string      `json:"SEX_ID,omitempty"`
 	Auth       Credentials `json:"CREDENTIALS,omitempty"`
 }
 
@@ -88,6 +89,7 @@ func getUserByEmail(e string) (user User, err error) {
 	return User{}, err
 }
 
+// Get user from REST server
 func getUser(email string) (u User, err error) {
 	u.Auth.Email = email
 	query := "?email=" + email

@@ -4,6 +4,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
 	"unicode/utf8"
 )
 
@@ -20,9 +21,15 @@ type Card struct {
 }
 
 type Test struct {
-	User    User
-	Profile TestProfile
-	Cards   []Card
+	User    User        `json:"PERSINFO"`
+	Profile TestProfile `json:"TASK_PROFILE"`
+	Time    Time        `json:"TIMING"`
+	Cards   []Card      `json:"RESULTS"`
+}
+
+type Time struct {
+	Start time.Time `json:"TESTING_START"`
+	End   time.Time `json:"TESTING_END"`
 }
 
 type Result struct {
@@ -31,8 +38,10 @@ type Result struct {
 }
 
 type TestResult struct {
-	UserId  int      `json:"userId"`
-	Results []Result `json:"results"`
+	User    User        `json:"PERSINFO"`
+	Profile TestProfile `json:"TASK_PROFILE"`
+	Time    Time        `json:"TIMING"`
+	Results []Result    `json:"RESULTS"`
 }
 
 type CardsResult []struct {
@@ -100,11 +109,14 @@ func (tr TestResult) indexOf(id int) (index int, found bool) {
 
 func newTestResult(vals url.Values) (tr TestResult, err error) {
 	m := flattenMap(vals)
-	tr.UserId = m["userId"]
+	tr.User.Id = m["userId"]
+	tr.Time.End = time.Now()
+	tr.Profile.Id = m["profile_id"]
 	if err != nil {
 		return tr, err
 	}
 	for k, v := range m {
+		// Create Result instance
 		var r Result
 		if strings.Contains(k, "answer_on_question_") {
 			idString, _ := strings.CutPrefix(k, "answer_on_question_")
@@ -127,10 +139,16 @@ func newTestResult(vals url.Values) (tr TestResult, err error) {
 	return tr, err
 }
 
-func newTest(u User, c []Card) Test {
+func newTest(u User, c []Card, pid int) (t Test) {
 	return Test{
 		User:  u,
 		Cards: c,
+		Profile: TestProfile{
+			Id: pid,
+		},
+		Time: Time{
+			Start: time.Now(),
+		},
 	}
 }
 
