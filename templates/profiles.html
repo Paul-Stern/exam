@@ -12,7 +12,10 @@
 <body>
     <form action="/profiles" method="post">
         {{range $i, $p := .Profiles}}
-        <input type="radio" name="TASK_PROFILE_ID" id="" value="{{$p.Id}}"> <span>{{$p.Text}}</span>
+        <div>
+            <input class="" type="radio" name="TASK_PROFILE_ID" id="profile_{{$p.Id}}" value="{{$p.Id}}">
+            <label class="form-label" for="profile_{{$p.Id}}">{{$p.Text}}</label>
+        </div>
         {{end}}
         <button type="submit" class="btn btn-primary">Выбрать</button>
     </form> 
