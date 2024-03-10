@@ -53,7 +53,7 @@ func LoadTemplates() error {
 	return nil
 }
 
-func renderTemplate(w http.ResponseWriter, tmpl string, test *Test) {
+func renderTemplate(w http.ResponseWriter, tmpl string, data any) {
 	// err := templates[tmpl+".html"].ExecuteTemplate(w, tmpl+".html", t)
 	t, ok := templates[tmpl+".html"]
 	if !ok {
@@ -61,7 +61,7 @@ func renderTemplate(w http.ResponseWriter, tmpl string, test *Test) {
 		return
 	}
 
-	if err := t.Execute(w, test); err != nil {
+	if err := t.Execute(w, data); err != nil {
 		log.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}

@@ -20,7 +20,7 @@ type Config struct {
 			SaveTestResults string `yaml:"saveTestResult"`
 			Register        string `yaml:"register"`
 			User            string `yaml:"User"`
-			Authenticate    string `yaml:"Authenticate"`
+			Authenticate    string `yaml:"authenticate"`
 		} `yaml:"nodes"`
 	} `yaml:"rest"`
 }

@@ -24,7 +24,7 @@ type session struct {
 }
 
 type DataTypes interface {
-	User | Tasks | TestProfile | []TestProfile
+	User | Tasks | TestProfile | []TestProfile | AvailableTestProfiles
 }
 
 type Message[D DataTypes] struct {
@@ -54,10 +54,12 @@ func main() {
 	if err != nil {
 		log.Fatalf("LoadTemplates error: %v", err)
 	}
+	fmt.Println(getAuthenticateUrl(cfg))
 
 	http.HandleFunc("/test", testHandler)
 	http.HandleFunc("/login", signInHandler)
 	http.HandleFunc("/signup", signUpHandler)
+	http.HandleFunc("/choose", chooseHandler)
 	http.HandleFunc("/success", successHandler)
 	http.HandleFunc("/json", jsonHandler)
 	// Helps to test getting answers over post
@@ -166,15 +168,15 @@ func jsonHandler(w http.ResponseWriter, r *http.Request) {
 func testHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
-		var t Test
+		// var t Test
 		// get user from cookie
-		cookie, _ := r.Cookie("Session id")
-		u := sessions[cookie.Value].user
-		// get tasks
-		tasks, _ := getTasks(u)
-		c := getCards(tasks)
-		t = newTest(u, c)
-		renderTemplate(w, "test", &t)
+		// cookie, _ := r.Cookie("Session id")
+		// u := sessions[cookie.Value].user
+		// // get tasks
+		// tasks, _ := getTasks(u)
+		// c := getCards(tasks)
+		// t = newTest(u, c)
+		// renderTemplate(w, "test", &t)
 	case "POST":
 		if err := r.ParseForm(); err != nil {
 			log.Printf("ParseForm() err: %v", err)
@@ -242,11 +244,12 @@ func signInHandler(w http.ResponseWriter, r *http.Request) {
 			expiry: expiresAt,
 		}
 		cookie := http.Cookie{}
-		cookie.Name = "Session id"
+		cookie.Name = "gosesid"
 		cookie.Value = sessionToken
+		cookie.Path = "/choose"
 		http.SetCookie(w, &cookie)
 		log.Println("Login: success. Redirecting...")
-		http.Redirect(w, r, "/test", http.StatusFound)
+		http.Redirect(w, r, "/choose", http.StatusFound)
 	}
 }
 
@@ -280,21 +283,52 @@ func signUpHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func chooseHandler(w http.ResponseWriter, r *http.Request) {
+	// get user from cookie
+	cookie, _ := r.Cookie("gosesid")
+	u := sessions[cookie.Value].user
+	// get tasks
+	profiles, _ := getProfiles(u)
+	renderTemplate(w, "choose", &profiles)
+
+}
+
 func successHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, successPage)
 }
 
-func getTasks(u User) (tasks Tasks, err error) {
+/*
+	func getTasks(u User) (tasks Tasks, err error) {
+		resp, err := post(u, getQuestionUrl(cfg))
+		if err != nil {
+			return
+		}
+		m, err := read[Tasks](resp)
+		if err != nil {
+			return
+		}
+		tasks = m.Data
+		return
+	}
+*/
+
+func getTasks(prof AvailableTestProfiles) (tasks Tasks, err error) {
+	// resp, err := post(prof, "")
+	return
+}
+
+func getProfiles(u User) (profiles AvailableTestProfiles, err error) {
 	resp, err := post(u, getQuestionUrl(cfg))
 	if err != nil {
 		return
 	}
-	m, err := read[Tasks](resp)
+	m, err := read[AvailableTestProfiles](resp)
 	if err != nil {
 		return
 	}
-	tasks = m.Data
+	profiles = m.Data
 	return
+
 }
 
 func readCreds(f url.Values) Credentials {

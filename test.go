@@ -20,8 +20,9 @@ type Card struct {
 }
 
 type Test struct {
-	User  User
-	Cards []Card
+	User    User
+	Profile TestProfile
+	Cards   []Card
 }
 
 type Result struct {
@@ -43,9 +44,14 @@ type TestPlan struct {
 	Id int
 }
 
+type AvailableTestProfiles struct {
+	User     User          `json:"USER"`
+	Profiles []TestProfile `json:"TASK_PROFILES"`
+}
+
 type TestProfile struct {
-	Id   int    `json:"TEST_PROFILE_ID"`
-	Text string `json:"TEST_PROFILE_TEXT"`
+	Id   int    `json:"TASK_PROFILE_ID"`
+	Text string `json:"TASK_PROFILE_TEXT"`
 }
 
 type TaskOption struct {
