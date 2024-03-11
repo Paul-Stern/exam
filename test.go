@@ -143,13 +143,11 @@ func newTestResult(vals url.Values) (tr TestResult, err error) {
 	return tr, err
 }
 
-func newTest(u User, c []Card, pid int) (t Test) {
+func newTest(u User, c []Card, pr TestProfile) (t Test) {
 	return Test{
-		User:  u,
-		Cards: c,
-		Profile: TestProfile{
-			Id: pid,
-		},
+		User:    u,
+		Cards:   c,
+		Profile: pr,
 		Time: Time{
 			Start: time.Now(),
 		},

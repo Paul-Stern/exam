@@ -15,6 +15,7 @@
         <div>
             <input class="" type="radio" name="TASK_PROFILE_ID" id="profile_{{$p.Id}}" value="{{$p.Id}}">
             <label class="form-label" for="profile_{{$p.Id}}">{{$p.Text}}</label>
+            <input type="hidden" name="TASK_PROFILE_TEXT_{{$p.Id}}" value="{{$p.Text}}">
         </div>
         {{end}}
         <button type="submit" class="btn btn-primary">Выбрать</button>

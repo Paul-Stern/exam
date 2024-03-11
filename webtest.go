@@ -20,10 +20,11 @@ import (
 type Answer int
 
 type session struct {
-	user   User
-	expiry time.Time
-	start  time.Time
-	result ResultStore
+	user    User
+	profile TestProfile
+	expiry  time.Time
+	start   time.Time
+	result  ResultStore
 }
 
 type DataTypes interface {
@@ -117,14 +118,12 @@ func testHandler(w http.ResponseWriter, r *http.Request) {
 	case "GET":
 		var t Test
 		// get user from session
-		u := sessions[sesCookie.Value].user
-		log.Println(sessions[sesCookie.Value])
-		profid, _ := r.Cookie("profid")
+		profid := strconv.Itoa(ses.profile.Id)
 		// get tasks
-		tasks, _ := getTasks(profid.Value)
+		tasks, _ := getTasks(profid)
 		c := getCards(tasks)
-		pid, _ := strconv.Atoi(profid.Value)
-		t = newTest(u, c, pid)
+		// Create test
+		t = newTest(ses.user, c, ses.profile)
 		ses.start = t.Time.Start
 		http.SetCookie(w, &http.Cookie{
 			Name:  "testing_start",
@@ -239,25 +238,32 @@ func signUpHandler(w http.ResponseWriter, r *http.Request) {
 func profilesHandler(w http.ResponseWriter, r *http.Request) {
 	// Get session id from cookie
 	sesCookie, _ := r.Cookie("gosesid")
-	// u := sessions[cookie.Value].user
+	ses := sessions[sesCookie.Value]
 
 	switch r.Method {
 	case http.MethodGet:
+		var profiles Profiles
 		// get tasks
-		profiles, _ := getProfiles()
+		profiles, _ = getProfiles()
 		renderTemplate(w, "profiles", &profiles)
 	case http.MethodPost:
 		if err := r.ParseForm(); err != nil {
 			log.Printf("ParseForm() err: %v", err)
 			return
 		}
-		profId := http.Cookie{
-			Name:  "profid",
-			Value: r.FormValue("TASK_PROFILE_ID"),
-			Path:  "/",
+		log.Printf("form: %+v\n", r.Form)
+
+		pids := r.FormValue("TASK_PROFILE_ID")
+		pid, _ := strconv.Atoi(pids)
+		ptext := r.FormValue("TASK_PROFILE_TEXT_" + pids)
+		profile := TestProfile{
+			Id:   pid,
+			Text: ptext,
 		}
-		http.SetCookie(w, sesCookie)
-		http.SetCookie(w, &profId)
+
+		ses.profile = profile
+		// Save session
+		sessions[sesCookie.Value] = ses
 		http.Redirect(w, r, "/test", http.StatusFound)
 
 	}
