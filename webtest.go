@@ -64,6 +64,7 @@ func main() {
 	http.HandleFunc("/signup", signUpHandler)
 	http.HandleFunc("/profiles", profilesHandler)
 	http.HandleFunc("/test", testHandler)
+	http.HandleFunc("/result", resultHandler)
 	http.HandleFunc("/success", successHandler)
 	http.HandleFunc("/json", jsonHandler)
 	// Helps to test getting answers over post
@@ -171,15 +172,15 @@ func jsonHandler(w http.ResponseWriter, r *http.Request) {
 
 func testHandler(w http.ResponseWriter, r *http.Request) {
 	// get session id from cookie
-	sesid, _ := r.Cookie("gosesid")
+	sesCookie, _ := r.Cookie("gosesid")
 	// get session data
-	ses := sessions[sesid.Value]
+	ses := sessions[sesCookie.Value]
 	switch r.Method {
 	case "GET":
 		var t Test
 		// get user from session
-		u := sessions[sesid.Value].user
-		log.Println(sessions[sesid.Value])
+		u := sessions[sesCookie.Value].user
+		log.Println(sessions[sesCookie.Value])
 		profid, _ := r.Cookie("profid")
 		// get tasks
 		tasks, _ := getTasks(profid.Value)
@@ -209,20 +210,25 @@ func testHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Printf("post error: %v", err)
 		}
-		log.Printf("%+v\n%+v", sessions[sesid.Value], tr)
+		log.Printf("%+v\n%+v", sessions[sesCookie.Value], tr)
 		url := baseUrl(cfg) + "/" + "tests"
 		// r := sendPostJson(tr, getSaveUrl(cfg))
-		r := sendPostJson(tr, url)
+		resp := sendPostJson(tr, url)
 		// got, err := io.ReadAll(r.Body)
-		result, _ := read[ResultStore](r)
+		result, _ := read[ResultStore](resp)
 		ses.result.Id = result.Data.Id
+		// save session
+		sessions[sesCookie.Value] = ses
 
 		// w.Header().Add("Content-Type", "application/json")
 		if err != nil {
 			log.Fatalf("post error: %v", err)
 		}
 		// fmt.Fprintf(w, "%s", got)
-		fmt.Fprintf(w, "session: %+v", ses)
+		// log.Printf("session: %+v", ses)
+		sesCookie.Path = "/result"
+		http.SetCookie(w, sesCookie)
+		http.Redirect(w, r, "/result", http.StatusFound)
 	}
 }
 func postHandler(w http.ResponseWriter, r *http.Request) {
@@ -306,7 +312,7 @@ func signUpHandler(w http.ResponseWriter, r *http.Request) {
 
 func profilesHandler(w http.ResponseWriter, r *http.Request) {
 	// Get session id from cookie
-	sesid, _ := r.Cookie("gosesid")
+	sesCookie, _ := r.Cookie("gosesid")
 	// u := sessions[cookie.Value].user
 
 	switch r.Method {
@@ -325,14 +331,23 @@ func profilesHandler(w http.ResponseWriter, r *http.Request) {
 			Value: r.FormValue("TASK_PROFILE_ID"),
 			Path:  "/test",
 		}
-		sesid.Path = "/test"
-		http.SetCookie(w, sesid)
+		sesCookie.Path = "/test"
+		http.SetCookie(w, sesCookie)
 		http.SetCookie(w, &profId)
 		http.Redirect(w, r, "/test", http.StatusFound)
 		// tasks, err := getTasks(r.FormValue("TASK_PROFILE_ID"))
 
 	}
 
+}
+
+func resultHandler(w http.ResponseWriter, r *http.Request) {
+	// get session id from cookie
+	sesCookie, _ := r.Cookie("gosesid")
+	// get session data
+	ses := sessions[sesCookie.Value]
+	// log.Printf("result session: %+v\n", ses)
+	renderTemplate(w, "result", ses)
 }
 
 func successHandler(w http.ResponseWriter, r *http.Request) {
