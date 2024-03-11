@@ -209,6 +209,7 @@ func signInHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// TODO: Reimplement this function
 func signUpHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
@@ -231,9 +232,6 @@ func signUpHandler(w http.ResponseWriter, r *http.Request) {
 		resp, _ := post(u, getRegister(cfg))
 		// Parse response with user data from REST server
 		read[User](resp)
-		// j, _ := json.Marshal(m)
-		// w.Header().Add("Content-Type", "application/json")
-		// fmt.Fprintf(w, "%s", j)
 		http.Redirect(w, r, "/success", http.StatusFound)
 
 	}
@@ -254,7 +252,6 @@ func profilesHandler(w http.ResponseWriter, r *http.Request) {
 			log.Printf("ParseForm() err: %v", err)
 			return
 		}
-		// fmt.Fprintf(w, "%v", r.Form)
 		profId := http.Cookie{
 			Name:  "profid",
 			Value: r.FormValue("TASK_PROFILE_ID"),
@@ -264,7 +261,6 @@ func profilesHandler(w http.ResponseWriter, r *http.Request) {
 		http.SetCookie(w, sesCookie)
 		http.SetCookie(w, &profId)
 		http.Redirect(w, r, "/test", http.StatusFound)
-		// tasks, err := getTasks(r.FormValue("TASK_PROFILE_ID"))
 
 	}
 
@@ -275,7 +271,6 @@ func resultHandler(w http.ResponseWriter, r *http.Request) {
 	sesCookie, _ := r.Cookie("gosesid")
 	// get session data
 	ses := sessions[sesCookie.Value]
-	// log.Printf("result session: %+v\n", ses)
 	renderTemplate(w, "result", ses)
 }
 
@@ -283,50 +278,42 @@ func successHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, successPage)
 }
 
-/*
-	func getTasks(u User) (tasks Tasks, err error) {
-		resp, err := post(u, getQuestionUrl(cfg))
-		if err != nil {
-			return
-		}
-		m, err := read[Tasks](resp)
-		if err != nil {
-			return
-		}
-		tasks = m.Data
-		return
-	}
-*/
-
 func getTasks(profileId string) (tasks Tasks, err error) {
+	// Build url
 	url := strings.Join([]string{
 		baseUrl(cfg),
 		"profiles",
 		profileId,
 		"tasks",
 	}, "/")
+	// Send request and get response
 	resp, err := http.Get(url)
 	if err != nil {
 		return
 	}
+	// Parse response to message
 	m, err := read[Tasks](resp)
 	if err != nil {
 		return
 	}
+	// Save message data to tasks
 	tasks = m.Data
 	return
 }
 
 func getProfiles() (profiles Profiles, err error) {
 	url := baseUrl(cfg) + "/profiles"
+	// Send request
 	resp, err := http.Get(url)
 	if err != nil {
 		return
 	}
+	// Parse response
 	m, err := read[Profiles](resp)
 	if err != nil {
 		return
 	}
+	// Save message data to profiles
 	profiles = m.Data
 	return
 }
