@@ -20,6 +20,9 @@ var (
 
 	funcMap = template.FuncMap{
 		"getFullName": User.getFullName,
+		"inc": func(i int) int {
+			return i + 1
+		},
 	}
 )
 

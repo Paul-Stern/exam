@@ -27,7 +27,7 @@
             {{range $i, $card := .Cards}}
             <div class="js-card{{if eq $i 0}} js-current{{else}} d-none{{end}} mb-5">
                 <input type="hidden" name="question_{{$card.Id}}_id" value="{{$card.Id}}">
-                <h5>Вопрос №{{$card.Id}}</h5>
+                <h5>Вопрос №{{inc $i}}</h5>
                 <div class="fw-medium mb-1">{{$card.Question}}</div>
                 {{if $card.Appendix}}
                     <ol class="mb-2">
