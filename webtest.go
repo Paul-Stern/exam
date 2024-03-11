@@ -24,10 +24,11 @@ type session struct {
 	user   User
 	expiry time.Time
 	start  time.Time
+	result ResultStore
 }
 
 type DataTypes interface {
-	User | Tasks | TestProfile | []TestProfile | AvailableTestProfiles | Profiles
+	User | Tasks | TestProfile | []TestProfile | AvailableTestProfiles | Profiles | ResultStore
 }
 
 type Message[D DataTypes] struct {
@@ -169,11 +170,13 @@ func jsonHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func testHandler(w http.ResponseWriter, r *http.Request) {
+	// get session id from cookie
+	sesid, _ := r.Cookie("gosesid")
+	// get session data
+	ses := sessions[sesid.Value]
 	switch r.Method {
 	case "GET":
 		var t Test
-		// get session from cookie
-		sesid, _ := r.Cookie("gosesid")
 		// get user from session
 		u := sessions[sesid.Value].user
 		log.Println(sessions[sesid.Value])
@@ -183,6 +186,7 @@ func testHandler(w http.ResponseWriter, r *http.Request) {
 		c := getCards(tasks)
 		pid, _ := strconv.Atoi(profid.Value)
 		t = newTest(u, c, pid)
+		ses.start = t.Time.Start
 		http.SetCookie(w, &http.Cookie{
 			Name:  "testing_start",
 			Value: t.Time.Start.Format(time.RFC3339),
@@ -205,17 +209,20 @@ func testHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Printf("post error: %v", err)
 		}
-		log.Printf("%v", tr)
+		log.Printf("%+v\n%+v", sessions[sesid.Value], tr)
 		url := baseUrl(cfg) + "/" + "tests"
 		// r := sendPostJson(tr, getSaveUrl(cfg))
 		r := sendPostJson(tr, url)
-		got, err := io.ReadAll(r.Body)
+		// got, err := io.ReadAll(r.Body)
+		result, _ := read[ResultStore](r)
+		ses.result.Id = result.Data.Id
 
-		w.Header().Add("Content-Type", "application/json")
+		// w.Header().Add("Content-Type", "application/json")
 		if err != nil {
 			log.Fatalf("post error: %v", err)
 		}
-		fmt.Fprintf(w, "%s", got)
+		// fmt.Fprintf(w, "%s", got)
+		fmt.Fprintf(w, "session: %+v", ses)
 	}
 }
 func postHandler(w http.ResponseWriter, r *http.Request) {

@@ -27,6 +27,10 @@ type Test struct {
 	Cards   []Card      `json:"RESULTS"`
 }
 
+type ResultStore struct {
+	Id int `json:"TESTING_RESULT_ID"`
+}
+
 type Time struct {
 	Start time.Time `json:"TESTING_START"`
 	End   time.Time `json:"TESTING_END"`
