@@ -162,7 +162,6 @@ func testHandler(w http.ResponseWriter, r *http.Request) {
 		// save session
 		sessions[sesCookie.Value] = ses
 
-		sesCookie.Path = "/result"
 		http.SetCookie(w, sesCookie)
 		http.Redirect(w, r, "/result", http.StatusFound)
 	}
@@ -202,7 +201,7 @@ func signInHandler(w http.ResponseWriter, r *http.Request) {
 		cookie := http.Cookie{}
 		cookie.Name = "gosesid"
 		cookie.Value = sessionToken
-		cookie.Path = "/profiles"
+		cookie.Path = "/"
 		http.SetCookie(w, &cookie)
 		log.Println("Login: success. Redirecting...")
 		http.Redirect(w, r, "/profiles", http.StatusFound)
@@ -255,9 +254,8 @@ func profilesHandler(w http.ResponseWriter, r *http.Request) {
 		profId := http.Cookie{
 			Name:  "profid",
 			Value: r.FormValue("TASK_PROFILE_ID"),
-			Path:  "/test",
+			Path:  "/",
 		}
-		sesCookie.Path = "/test"
 		http.SetCookie(w, sesCookie)
 		http.SetCookie(w, &profId)
 		http.Redirect(w, r, "/test", http.StatusFound)
