@@ -4,7 +4,6 @@ import (
 	"bytes"
 	_ "embed"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -91,11 +90,13 @@ func newCard(id int, question string, opts []Option) Card {
 }
 
 func post(v any, url string) (*http.Response, error) {
+	// Create json
 	out, err := json.Marshal(v)
 	if err != nil {
 		log.Printf("post error: %v", err)
 	}
 
+	// Post json and get reponse
 	resp, err := http.Post(
 		url,
 		"application/json",
@@ -105,48 +106,6 @@ func post(v any, url string) (*http.Response, error) {
 		log.Printf("post error: %v", err)
 	}
 	return resp, err
-}
-
-func getPostJson(c Credentials, url string) []byte {
-	out, err := json.Marshal(c)
-	if err != nil {
-		log.Printf("post error: %v", err)
-	}
-	resp, err := http.Post(
-		url,
-		"application/json",
-		bytes.NewBuffer(out),
-	)
-	if err != nil {
-		log.Printf("post error: %v", err)
-	}
-	// Read body
-	got, err := io.ReadAll(resp.Body)
-	if err != nil {
-		log.Printf("post error: %v", err)
-	}
-	return got
-}
-func sendPostJson(r TestResult, url string) *http.Response {
-	j, err := json.Marshal(r)
-	if err != nil {
-		log.Printf("sendPostJson error: %v", err)
-	}
-	if !json.Valid(j) {
-		err = errors.New("json is not valid")
-		log.Printf("sendPostJson error: %v", err)
-	}
-	res, err := http.Post(
-		url,
-		"application/json",
-		bytes.NewBuffer(j),
-	)
-	if err != nil {
-		log.Printf("sendPostJson error: %v", err)
-	}
-	log.Println("success")
-
-	return res
 }
 
 func testHandler(w http.ResponseWriter, r *http.Request) {
@@ -174,37 +133,35 @@ func testHandler(w http.ResponseWriter, r *http.Request) {
 		// http.SetCookie(w, profid)
 		renderTemplate(w, "test", &t)
 	case "POST":
+		// Get data from form
 		if err := r.ParseForm(); err != nil {
 			log.Printf("ParseForm() err: %v", err)
 			return
 		}
 		f := r.PostForm
-		log.Printf("%s", f)
+		// Put data to Test Result
 		tr, err := newTestResult(f)
 		if err != nil {
-			log.Printf("post error: %v", err)
+			log.Printf("test error: %v", err)
 		}
 		testStart, _ := r.Cookie("testing_start")
 		tr.Time.Start, err = time.Parse(time.RFC3339, testStart.Value)
 		if err != nil {
-			log.Printf("post error: %v", err)
+			log.Printf("test error: %v", err)
 		}
-		log.Printf("%+v\n%+v", sessions[sesCookie.Value], tr)
 		url := baseUrl(cfg) + "/" + "tests"
-		// r := sendPostJson(tr, getSaveUrl(cfg))
-		resp := sendPostJson(tr, url)
-		// got, err := io.ReadAll(r.Body)
+		// Post test results and get response
+		resp, err := post(tr, url)
+		if err != nil {
+			log.Printf("test error: %v", err)
+		}
+		// Parse stored result id
 		result, _ := read[ResultStore](resp)
+		// Save stored result id to session
 		ses.result.Id = result.Data.Id
 		// save session
 		sessions[sesCookie.Value] = ses
 
-		// w.Header().Add("Content-Type", "application/json")
-		if err != nil {
-			log.Fatalf("post error: %v", err)
-		}
-		// fmt.Fprintf(w, "%s", got)
-		// log.Printf("session: %+v", ses)
 		sesCookie.Path = "/result"
 		http.SetCookie(w, sesCookie)
 		http.Redirect(w, r, "/result", http.StatusFound)
