@@ -60,10 +60,10 @@ func main() {
 	}
 	log.Println(getSaveUrl(cfg))
 
-	http.HandleFunc("/test", testHandler)
 	http.HandleFunc("/login", signInHandler)
 	http.HandleFunc("/signup", signUpHandler)
 	http.HandleFunc("/profiles", profilesHandler)
+	http.HandleFunc("/test", testHandler)
 	http.HandleFunc("/success", successHandler)
 	http.HandleFunc("/json", jsonHandler)
 	// Helps to test getting answers over post
