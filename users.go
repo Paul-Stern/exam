@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 )
@@ -20,49 +19,6 @@ type User struct {
 	Auth       Credentials `json:"CREDENTIALS,omitempty"`
 }
 
-type Users []User
-
-var users = Users{
-	User{
-		Id:         1,
-		Name:       "Евгений",
-		Middlename: "Семенович",
-		Surname:    "Коновалов",
-		Auth: Credentials{
-			Email:    ***REMOVED***,
-			Password: ***REMOVED***,
-		},
-	},
-	User{
-		Id:         2,
-		Name:       "Юлиан",
-		Middlename: "Петрович",
-		Surname:    "Костоправ",
-		Auth: Credentials{
-			Email:    ***REMOVED***,
-			Password: ***REMOVED***,
-		},
-	},
-	User{
-		Id:         3,
-		Name:       "Герман",
-		Middlename: "Станиславович",
-		Surname:    "Кривонос",
-		Auth: Credentials{
-			Email:    ***REMOVED***,
-			Password: ***REMOVED***,
-		},
-	},
-}
-
-func getUserById(id int) User {
-	return users[id-1]
-}
-
-func getUserCreds(id int) Credentials {
-	return users[id-1].Auth
-}
-
 func (u User) getFullName() string {
 	return fmt.Sprintf("%s %s %s", u.Surname, u.Name, u.Middlename)
 }
@@ -77,16 +33,6 @@ func newUser(name, mname, surname, email, password string) (u User) {
 			Password: password,
 		},
 	}
-}
-
-func getUserByEmail(e string) (user User, err error) {
-	for _, u := range users {
-		if e == u.Auth.Email {
-			return u, nil
-		}
-	}
-	err = errors.New("User not found")
-	return User{}, err
 }
 
 // Get user from REST server

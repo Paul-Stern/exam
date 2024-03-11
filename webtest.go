@@ -58,7 +58,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("LoadTemplates error: %v", err)
 	}
-	log.Println(getSaveUrl(cfg))
 
 	http.HandleFunc("/login", signInHandler)
 	http.HandleFunc("/signup", signUpHandler)
@@ -66,9 +65,7 @@ func main() {
 	http.HandleFunc("/test", testHandler)
 	http.HandleFunc("/result", resultHandler)
 	http.HandleFunc("/success", successHandler)
-	http.HandleFunc("/json", jsonHandler)
 	// Helps to test getting answers over post
-	http.HandleFunc("/post", postHandler)
 	log.Printf("Server started. Listening to localhost%s", ":"+cfg.Server.Port)
 	log.Fatal(http.ListenAndServe(":"+cfg.Server.Port, nil))
 }
@@ -152,24 +149,6 @@ func sendPostJson(r TestResult, url string) *http.Response {
 	return res
 }
 
-func getRestBlock(c Credentials) (tasks Tasks) {
-	got := getPostJson(c, getQuestionUrl(cfg))
-	err := json.Unmarshal(got, &tasks)
-	if err != nil {
-		log.Printf("getRestBlock error: %v", err)
-	}
-	return tasks
-}
-
-func jsonHandler(w http.ResponseWriter, r *http.Request) {
-	data, err := json.Marshal(users[1].Auth)
-	if err != nil {
-		log.Printf("Json error: %v", err)
-	}
-	w.Header().Add("Content-type", "application/json")
-	fmt.Fprintf(w, "%s", data)
-}
-
 func testHandler(w http.ResponseWriter, r *http.Request) {
 	// get session id from cookie
 	sesCookie, _ := r.Cookie("gosesid")
@@ -230,13 +209,6 @@ func testHandler(w http.ResponseWriter, r *http.Request) {
 		http.SetCookie(w, sesCookie)
 		http.Redirect(w, r, "/result", http.StatusFound)
 	}
-}
-func postHandler(w http.ResponseWriter, r *http.Request) {
-	b := getPostJson(getUserCreds(1), getQuestionUrl(cfg))
-	// b := r.Body
-	w.Header().Add("Content-Type", "application/json")
-	fmt.Fprintf(w, "%s", b)
-
 }
 
 func signInHandler(w http.ResponseWriter, r *http.Request) {
