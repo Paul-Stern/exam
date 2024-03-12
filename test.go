@@ -17,6 +17,7 @@ type Card struct {
 	Id       int
 	Question string
 	Appendix []string
+	Count    int
 	Options  []Option
 }
 
@@ -84,6 +85,7 @@ type Task struct {
 	Id            int          `json:"ID"`
 	Task_text     string       `json:"TASK_TEXT"`
 	Task_appendix []string     `json:"TASK_APPENDIX"`
+	Count         int          `json:"RIGHT_ANSWERS_COUNT"`
 	Answers       []TaskOption `json:"ANSWERS"`
 }
 
@@ -164,6 +166,7 @@ func getCards(tasks Tasks) (cards []Card) {
 		c.Id = task.Id
 		c.Question = task.Task_text
 		c.Appendix = removeAppendixPrefix(task.Task_appendix)
+		c.Count = task.Count
 		for _, o := range task.Answers {
 			c.Options = append(
 				c.Options,
@@ -186,4 +189,7 @@ func removeAppendixPrefix(ap []string) []string {
 		result = append(result, s[(j*3):])
 	}
 	return result
+}
+func (t Task) IsMultiple() bool {
+	return t.Count > 1
 }
