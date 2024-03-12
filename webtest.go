@@ -154,6 +154,10 @@ func testHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Printf("test error: %v", err)
 		}
+		// j, _ := io.ReadAll(resp.Body)
+		// w.Header().Add("Content-Type", "application/json")
+		// fmt.Fprintf(w, "%s", j)
+		// return
 		// Parse stored result id
 		result, _ := read[ResultStore](resp)
 		// Save stored result id to session
@@ -275,7 +279,10 @@ func resultHandler(w http.ResponseWriter, r *http.Request) {
 	sesCookie, _ := r.Cookie("gosesid")
 	// get session data
 	ses := sessions[sesCookie.Value]
-	renderTemplate(w, "result", ses)
+	result, _ := getResult(ses.result.Id)
+	// test scenario
+	// result, _ := getResult(255)
+	renderTemplate(w, "result", result)
 }
 
 func successHandler(w http.ResponseWriter, r *http.Request) {
@@ -320,6 +327,24 @@ func getProfiles() (profiles Profiles, err error) {
 	// Save message data to profiles
 	profiles = m.Data
 	return
+}
+
+func getResult(id int) (result ResultStore, err error) {
+	ids := strconv.Itoa(id)
+	url := baseUrl(cfg) + "/tests/" + ids
+	// Send request
+	resp, err := http.Get(url)
+	if err != nil {
+		return
+	}
+	// Parse response
+	m, err := read[ResultStore](resp)
+	if err != nil {
+		return
+	}
+	result = m.Data
+	return
+
 }
 
 func readCreds(f url.Values) Credentials {

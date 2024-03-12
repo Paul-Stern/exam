@@ -28,7 +28,11 @@ type Test struct {
 }
 
 type ResultStore struct {
-	Id int `json:"TESTING_RESULT_ID"`
+	Id           int  `json:"TESTING_RESULT_ID"`
+	Total        int  `json:"TOTAL_QUESTIONS"`
+	CorrectCount int  `json:"RIGHT_ANSWERS"`
+	Percent      int  `json:"PERCENT"`
+	Certified    bool `json:"CERTIFIED"`
 }
 
 type Time struct {
