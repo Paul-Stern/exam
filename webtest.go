@@ -138,12 +138,8 @@ func testHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		f := r.PostForm
-		// log.Printf("form: %+v", f)
-		// return
 		// Put data to Test Result
 		tr, err := newTestResult(f)
-		// log.Printf("test result: %+v", tr)
-		// return
 		if err != nil {
 			log.Printf("test error: %v", err)
 		}
@@ -159,10 +155,6 @@ func testHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Printf("test error: %v", err)
 		}
-		// j, _ := io.ReadAll(resp.Body)
-		// w.Header().Add("Content-Type", "application/json")
-		// fmt.Fprintf(w, "%s", j)
-		// return
 		// Parse stored result id
 		result, _ := read[ResultStore](resp)
 		// Save stored result id to session
