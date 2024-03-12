@@ -38,12 +38,21 @@
                 {{end}}
                 <div class="text-body mt-1 fw-normal">
                 {{range $j, $o := $card.Options}}
-                    <div class="form-check mb-3">
-                        <label class="form-check-label" for="">
-                        <input class="form-check-input" type="radio" name="answer_on_question_{{$card.Id}}"
-                            id="option_{{$o.Id}}" value="{{$o.Id}}"> {{$o.Text}}
-                        </label>
-                    </div>
+                    {{if (gt $card.Count 1)}}
+                        <div class="form-check mb-3">
+                            <label class="form-check-label" for="">
+                            <input class="form-check-input" type="checkbox" name="answer_on_question_{{$card.Id}}"
+                                id="option_{{$o.Id}}" value="{{$o.Id}}"> {{$o.Text}}
+                            </label>
+                        </div>
+                    {{else}}
+                        <div class="form-check mb-3">
+                            <label class="form-check-label" for="">
+                            <input class="form-check-input" type="radio" name="answer_on_question_{{$card.Id}}"
+                                id="option_{{$o.Id}}" value="{{$o.Id}}"> {{$o.Text}}
+                            </label>
+                        </div>
+                    {{end}}
                 {{end}}
                 </div>
             </div>
