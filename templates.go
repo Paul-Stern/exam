@@ -23,6 +23,7 @@ var (
 		"inc": func(i int) int {
 			return i + 1
 		},
+		"type": Card.Type,
 	}
 )
 

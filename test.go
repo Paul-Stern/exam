@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -118,32 +119,37 @@ func (tr TestResult) indexOf(id int) (index int, found bool) {
 }
 
 func newTestResult(vals url.Values) (tr TestResult, err error) {
-	m := flattenMap(vals)
-	tr.User.Id = m["userId"]
+	// m := flattenMap(vals)
+	tr.User.Id, err = strconv.Atoi(vals["userId"][0])
 	tr.Time.End = time.Now()
-	tr.Profile.Id = m["profile_id"]
+	tr.Profile.Id, err = strconv.Atoi(vals["profile_id"][0])
 	if err != nil {
 		return tr, err
 	}
-	for k, v := range m {
+	req := regexp.MustCompile(`question_[[:digit:]]+_id`)
+	for k, v := range vals {
 		// Create Result instance
 		var r Result
 		if strings.Contains(k, "answer_on_question_") {
 			idString, _ := strings.CutPrefix(k, "answer_on_question_")
 			r.QuestionId, err = strconv.Atoi(idString)
-			r.AnswerIds = append(r.AnswerIds, v)
-			i, found := tr.indexOf(r.QuestionId)
-			if found {
-				tr.Results[i].AnswerIds = append(tr.Results[i].AnswerIds, v)
-			} else {
-				tr.Results = append(tr.Results, r)
+			for _, vv := range v {
+				aid, _ := strconv.Atoi(vv)
+				r.AnswerIds = append(r.AnswerIds, aid)
 			}
-		} else if strings.Contains(k, "_id") {
-			r.QuestionId = v
-			_, found := tr.indexOf(r.QuestionId)
-			if !found {
-				tr.Results = append(tr.Results, r)
-			}
+
+		} else if req.MatchString(k) {
+			r.QuestionId, err = strconv.Atoi(v[0])
+		}
+		// skip user and profile keys
+		if strings.Contains(k, "user") || strings.Contains(k, "profile") {
+			continue
+		}
+		i, found := tr.indexOf(r.QuestionId)
+		if !found {
+			tr.Results = append(tr.Results, r)
+		} else if len(r.AnswerIds) > 0 {
+			tr.Results[i] = r
 		}
 	}
 	return tr, err
@@ -192,4 +198,11 @@ func removeAppendixPrefix(ap []string) []string {
 }
 func (t Task) IsMultiple() bool {
 	return t.Count > 1
+}
+func (card Card) Type() (t string) {
+	if card.Count > 1 {
+		return "checkbox"
+	} else {
+		return "radio"
+	}
 }

@@ -138,8 +138,12 @@ func testHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		f := r.PostForm
+		// log.Printf("form: %+v", f)
+		// return
 		// Put data to Test Result
 		tr, err := newTestResult(f)
+		// log.Printf("test result: %+v", tr)
+		// return
 		if err != nil {
 			log.Printf("test error: %v", err)
 		}
@@ -149,6 +153,7 @@ func testHandler(w http.ResponseWriter, r *http.Request) {
 			log.Printf("test error: %v", err)
 		}
 		url := baseUrl(cfg) + "/" + "tests"
+
 		// Post test results and get response
 		resp, err := post(tr, url)
 		if err != nil {
