@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"unicode/utf8"
 )
 
 type Option struct {
@@ -185,14 +184,13 @@ func getCards(tasks Tasks) (cards []Card) {
 }
 
 func removeAppendixPrefix(ap []string) []string {
+	pref := regexp.MustCompile(`[\d.]+[ ]?`)
 	if ap == nil {
 		return ap
 	}
 	var result []string
 	for _, s := range ap {
-		_, j := utf8.DecodeRuneInString(s)
-		// result[i] = s[(j * 3):]
-		result = append(result, s[(j*3):])
+		result = append(result, pref.ReplaceAllString(s, ""))
 	}
 	return result
 }
