@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 )
 
 type Credentials struct {
@@ -10,12 +11,17 @@ type Credentials struct {
 	Password string `json:"PASSWORD"`
 }
 
+const (
+	female = 1 + iota
+	male
+)
+
 type User struct {
 	Id         int         `json:"PERSINFO_ID,omitempty"`
 	Name       string      `json:"FIRSTNAME,omitempty"`
 	Middlename string      `json:"MIDDLENAME,omitempty"`
 	Surname    string      `json:"LASTNAME,omitempty"`
-	Sex        string      `json:"SEX_ID,omitempty"`
+	Sex        int         `json:"SEX_ID,omitempty"`
 	Auth       Credentials `json:"CREDENTIALS,omitempty"`
 }
 
@@ -23,11 +29,13 @@ func (u User) getFullName() string {
 	return fmt.Sprintf("%s %s %s", u.Surname, u.Name, u.Middlename)
 }
 
-func newUser(name, mname, surname, email, password string) (u User) {
+func newUser(name, mname, surname, sex, email, password string) (u User) {
+	s, _ := strconv.Atoi(sex)
 	return User{
 		Name:       name,
 		Middlename: mname,
 		Surname:    surname,
+		Sex:        s,
 		Auth: Credentials{
 			Email:    email,
 			Password: password,

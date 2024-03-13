@@ -223,12 +223,13 @@ func signUpHandler(w http.ResponseWriter, r *http.Request) {
 			r.Form["name"][0],
 			r.Form["middlename"][0],
 			r.Form["surname"][0],
+			r.FormValue("sex"),
 			r.Form["email"][0],
 			r.Form["password"][0])
 		// fmt.Fprintf(w, "%v", u)
-
 		// Send registration data to REST server
-		resp, _ := post(u, getRegister(cfg))
+		url := baseUrl(cfg) + "/persons"
+		resp, _ := post(u, url)
 		// Parse response with user data from REST server
 		read[User](resp)
 		http.Redirect(w, r, "/success", http.StatusFound)
