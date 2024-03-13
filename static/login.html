@@ -20,17 +20,18 @@
         }
     </style>
 </head>
-<body class="d-flex align-items-center">
+<body class="d-flex align-items-center py-4 bg-body-tertiary">
     <main class="form-signin w-100 m-auto">
-            <!-- <img src="./health.svg" class="col-3" alt=""> -->
-            <h1 class="h4 text-center">Тестирование ЯОКБ</h1>
+        <h1 class="h4">Тестирование ЯОКБ</h1>
         <form class="form-signin w-100 m-auto" action="/login" method="POST">
-            <h2 class="h5">Пожалуйста, авторизуйтесь</h1>
-            <div class="form-email">
+            <h2 class="h5 fw-normal">Пожалуйста, авторизуйтесь</h1>
+            <div class="form-email form-floating">
                 <input id="field-email" name="email" type="email" class="form-control" placeholder="user@example.com">
+                <label for="field-email">Электронная почта</label>
             </div>
-            <div class="form-pass">
+            <div class="form-pass form-floating">
                 <input type="password" name="password" class="form-control" id="field-pass" placeholder="пароль">
+                <label for="field-pass">Пароль</label>
             </div>
             <button type="submit" class="btn btn-login-submit btn-primary w-100">Войти</button>
             <p class="mt-5 mb-3 text-body-secondary"> © 2024</p>
