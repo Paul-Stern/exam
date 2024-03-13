@@ -52,6 +52,8 @@ var signupPage string
 //go:embed static/successfulRegistration.html
 var successPage string
 
+var version string
+
 func main() {
 	readConf(&cfg)
 	err := LoadTemplates()
@@ -66,6 +68,7 @@ func main() {
 	http.HandleFunc("/result", resultHandler)
 	http.HandleFunc("/success", successHandler)
 	// Helps to test getting answers over post
+	log.Printf("Version: %s\n", version)
 	log.Printf("Server started. Listening to localhost%s", ":"+cfg.Server.Port)
 	log.Fatal(http.ListenAndServe(":"+cfg.Server.Port, nil))
 }
