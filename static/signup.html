@@ -21,22 +21,33 @@
         }
     </style>
 </head>
-<body class="d-flex align-items-center py-4">
+<body class="d-flex align-items-center py-4 bg-body-tertiary">
     <main class="signup w-100 m-auto">
             <!-- <img src="./health.svg" class="col-3" alt=""> -->
         <form class="" action="/signup" method="POST">
-            <h1 class="h4 text-center">Тестирование ЯОКБ</h1>
-            <h2 class="h5">Пожалуйста, зарегистрируйтесь</h1>
+            <h1 class="h4">Тестирование ЯОКБ</h1>
+            <h2 class="h5 fw-normal">Пожалуйста, зарегистрируйтесь</h1>
             <div class="form-name">
-                <input id="field-name" name="name" type="text" class="form-control" placeholder="Имя">
-                <input id="field-middlename" name="middlename" type="text" class="form-control" placeholder="Отчество">
-                <input id="field-surname" name="surname" type="text" class="form-control" placeholder="Фамилия">
+                <div class="form-floating">
+                    <input id="field-name" name="name" type="text" class="form-control" placeholder="Имя">
+                    <label for="field-name">Имя</label>
+                </div>
+                <div class="form-floating">
+                    <input id="field-middlename" name="middlename" type="text" class="form-control" placeholder="Отчество">
+                    <label for="field-middlename">Отчество</label>
+                </div>
+                <div class="form-floating">
+                    <input id="field-surname" name="surname" type="text" class="form-control" placeholder="Фамилия">
+                    <label for="field-surname">Фамилия</label>
+                </div>
             </div>
-            <div class="form-email">
+            <div class="form-email form-floating">
                 <input id="field-email" name="email" type="email" class="form-control" placeholder="user@example.com">
+                <label for="field-email">Электронная почта</label>
             </div>
-            <div class="form-pass">
+            <div class="form-pass form-floating">
                 <input type="password" name="password" class="form-control" id="field-pass" placeholder="пароль">
+                <label for="password">Пароль</label>
             </div>
             <button type="submit" class="btn btn-login-submit btn-primary w-100">Зарегистрироваться</button>
             <p class="mt-5 mb-3 text-body-secondary"> © 2024</p>
