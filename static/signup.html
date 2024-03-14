@@ -41,10 +41,10 @@
                     <label for="field-surname">Фамилия</label>
                 </div>
             </div>
-            <select class="form-select" name="sex" id="sex-select" required="true">
-                <option selected">Пол</option>
-                <option value="2">Мужской</option>
-                <option value="1">Женский</option>
+            <select class="form-select" name="sex" id="sex-select" required="true" pattern="1|2">
+                <option value="" selected">Пол</option>
+                <option value="1">Мужской</option>
+                <option value="2">Женский</option>
             </select>
             <div class="form-email form-floating">
                 <input id="field-email" name="email" type="email" class="form-control" placeholder="user@example.com">
