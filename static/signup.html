@@ -24,7 +24,7 @@
 <body class="d-flex align-items-center py-4 bg-body-tertiary">
     <main class="signup w-100 m-auto">
             <!-- <img src="./health.svg" class="col-3" alt=""> -->
-        <form class="" action="/signup" method="POST">
+        <form class="needs-validation" action="/signup" method="POST">
             <h1 class="h4">Тестирование ЯОКБ</h1>
             <h2 class="h5 fw-normal">Пожалуйста, зарегистрируйтесь</h1>
             <div class="form-name">
@@ -42,7 +42,7 @@
                 </div>
             </div>
             <select class="form-select" name="sex" id="sex-select" required="true" pattern="1|2">
-                <option value="" selected">Пол</option>
+                <option value="" selected>Пол</option>
                 <option value="1">Мужской</option>
                 <option value="2">Женский</option>
             </select>
@@ -51,11 +51,11 @@
                 <label for="field-email">Электронная почта</label>
             </div>
             <div class="form-pass form-floating">
-                <input type="password" name="password" class="form-control" id="field-pass" placeholder="пароль">
+                <input type="password" name="password" class="form-control" id="field-pass" placeholder="пароль" onchange="matchPass()">
                 <label for="field-pass">Пароль</label>
             </div>
             <div class="form-pass form-floating">
-                <input type="password" name="password-confirm" class="form-control" id="field-pass-confirm" placeholder="">
+                <input type="password" name="password-confirm" class="form-control" id="field-pass-confirm" placeholder="" onchange="matchPass()">
                 <label for="field-pass-confirm">Повторите пароль</label>
             </div>
             <button type="submit" class="btn btn-login-submit btn-primary w-100">Зарегистрироваться</button>
@@ -65,6 +65,47 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous">
+    </script>
+    <script>
+    function matchPass() {
+        const forms = document.querySelectorAll('.needs-validation')
+        const pass = document.getElementById("field-pass");
+        const confirm = document.getElementById("field-pass-confirm");
+        let cl = ""
+        if (pass.value != confirm.value) {
+            const message = "Пароли не совпадают";
+            pass.setCustomValidity(message)
+            confirm.setCustomValidity(message)
+            pass.classList.remove("is-valid")
+            pass.classList.add("is-invalid")
+            confirm.classList.remove("is-valid")
+            confirm.classList.add("is-invalid")
+        } else {
+            pass.setCustomValidity("")
+            confirm.setCustomValidity("")
+            pass.classList.remove("is-invalid")
+            pass.classList.add("is-valid")
+            confirm.classList.remove("is-invalid")
+            confirm.classList.add("is-valid")
+        }
+    }
+    (() => {
+    'use strict'
+
+    // Fetch all the forms we want to apply custom Bootstrap validation styles to
+    const forms = document.querySelectorAll('.needs-validation')
+
+    // Loop over them and prevent submission
+    Array.from(forms).forEach(form => {
+        form.addEventListener('submit', event => {
+        if (!form.checkValidity()) {
+            event.preventDefault()
+            event.stopPropagation()
+        }
+        // form.classList.add('was-validated')
+        }, false)
+    })
+    })()
     </script>
 </body>
 </html>
