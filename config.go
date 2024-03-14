@@ -39,21 +39,6 @@ func readConf(cfg *Config) {
 	}
 }
 
-func getQuestionUrl(cfg Config) string {
-	return baseUrl(cfg) + cfg.Rest.Nodes.GetQuestions
-}
-
-func getAuthenticateUrl(cfg Config) string {
-	return baseUrl(cfg) + cfg.Rest.Nodes.Authenticate
-}
-
-func getSaveUrl(cfg Config) string {
-	return baseUrl(cfg) + "/" + cfg.Rest.Nodes.SaveTestResults
-}
-
-func getRegister(cfg Config) string {
-	return baseUrl(cfg) + cfg.Rest.Nodes.Register
-}
 func baseUrl(cfg Config) string {
 	return strings.Join([]string{
 		"http://",
