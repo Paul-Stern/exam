@@ -12,16 +12,9 @@ type Config struct {
 		Port string `yaml:"port"`
 	} `yaml:"server"`
 	Rest struct {
-		Host  string `yaml:"host"`
-		Port  string `yaml:"port"`
-		Rest  string `yaml:"restPath"`
-		Nodes struct {
-			GetQuestions    string `yaml:"getQuestions"`
-			SaveTestResults string `yaml:"saveTestResult"`
-			Register        string `yaml:"register"`
-			User            string `yaml:"User"`
-			Authenticate    string `yaml:"authenticate"`
-		} `yaml:"nodes"`
+		Host string `yaml:"host"`
+		Port string `yaml:"port"`
+		Rest string `yaml:"restPath"`
 	} `yaml:"rest"`
 }
 

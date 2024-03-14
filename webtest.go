@@ -52,6 +52,9 @@ var signupPage string
 //go:embed static/successfulRegistration.html
 var successPage string
 
+//go:embed static/config.html
+var configPage string
+
 var version string
 
 func main() {
@@ -64,6 +67,7 @@ func main() {
 		version = "dev"
 	}
 
+	http.HandleFunc("/config", configHandler)
 	http.HandleFunc("/login", signInHandler)
 	http.HandleFunc("/signup", signUpHandler)
 	http.HandleFunc("/profiles", profilesHandler)
@@ -113,6 +117,19 @@ func post(v any, url string) (*http.Response, error) {
 		log.Printf("post error: %v", err)
 	}
 	return resp, err
+}
+
+func configHandler(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		fmt.Fprint(w, configPage)
+	case http.MethodPost:
+		// Get data from form
+		if err := r.ParseForm(); err != nil {
+			log.Printf("ParseForm() err: %v", err)
+			return
+		}
+	}
 }
 
 func testHandler(w http.ResponseWriter, r *http.Request) {
