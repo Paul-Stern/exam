@@ -1,7 +1,7 @@
 win:
 	GOOS=windows GOARCH=amd64 go build -o webtest.exe .
 default:
-	go build -ldflags "-X main.version=`git rev-parse HEAD`".
+	go build -ldflags "-X main.version=`git describe --tags`".
 
 clean:
 	rm webtest.exe webtest
