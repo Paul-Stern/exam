@@ -60,6 +60,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("LoadTemplates error: %v", err)
 	}
+	if version == "" {
+		version = "dev"
+	}
 
 	http.HandleFunc("/login", signInHandler)
 	http.HandleFunc("/signup", signUpHandler)
