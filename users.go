@@ -43,7 +43,7 @@ func newUser(name, mname, surname, sex, email, password string) (u User) {
 		Name:       name,
 		Middlename: mname,
 		Surname:    surname,
-		Sex:        s,
+		Sex:        NewSex(s),
 		Auth: Credentials{
 			Email:    email,
 			Password: password,
