@@ -11,17 +11,25 @@ type Credentials struct {
 	Password string `json:"PASSWORD"`
 }
 
+type Sex int
+
 const (
-	female = 1 + iota
-	male
+	Unknown Sex = iota
+	Male
+	Female
 )
+
+var sexID = map[Sex]int{
+	Male:   1,
+	Female: 2,
+}
 
 type User struct {
 	Id         int         `json:"PERSINFO_ID,omitempty"`
 	Name       string      `json:"FIRSTNAME,omitempty"`
 	Middlename string      `json:"MIDDLENAME,omitempty"`
 	Surname    string      `json:"LASTNAME,omitempty"`
-	Sex        int         `json:"SEX_ID,omitempty"`
+	Sex        Sex         `json:"SEX_ID,omitempty"`
 	Auth       Credentials `json:"CREDENTIALS,omitempty"`
 }
 
@@ -59,4 +67,13 @@ func getUser(email string) (u User, err error) {
 	u = message.Data
 	return
 
+}
+
+func NewSex(i int) Sex {
+	for s, v := range sexID {
+		if i == v {
+			return s
+		}
+	}
+	return Unknown
 }
