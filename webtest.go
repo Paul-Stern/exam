@@ -74,7 +74,7 @@ func main() {
 	log.Printf("Version: %s\n", version)
 	log.Printf("Server started. Listening to localhost%s", ":"+cfg.Server.Port)
 	// paths to the cert and the key
-	log.Fatal(http.ListenAndServeTLS(":"+cfg.Server.Port, cfg.Server.Cert, cfg.Server.Key, nil))
+	log.Fatal(http.ListenAndServeTLS(cfg.Server.Host+":"+cfg.Server.Port, cfg.Server.Cert, cfg.Server.Key, nil))
 }
 func processError(err error) {
 	fmt.Println(err)
