@@ -6,12 +6,25 @@ import (
 	"io/fs"
 	"log"
 	"net/http"
-	"strings"
 )
 
 const (
 	templatesDir = "templates"
 )
+
+// type TemplateDataTypes interface {
+// 	Profiles | ResultStore | Test
+// }
+
+// type TemplateData[DT TemplateDataTypes] struct {
+// 	Data    DT
+// 	Session session
+// }
+
+type TemplateData struct {
+	Data    any
+	Session session
+}
 
 var (
 	//go:embed templates/*
@@ -43,9 +56,7 @@ func LoadTemplates() error {
 
 		t := template.New(tmpl.Name())
 
-		if strings.Contains(t.Name(), "test.html") {
-			t.Funcs(funcMap)
-		}
+		t.Funcs(funcMap)
 
 		pt, err := t.ParseFS(files, templatesDir+"/"+tmpl.Name())
 		if err != nil {

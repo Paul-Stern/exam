@@ -11,8 +11,9 @@
 </head>
 <body class="container">
     <form action="/profiles" method="post" class="row">
+        <h6 class="text-secondary">Работник: {{getFullName .Session.User}}</h6>
         <h4>Выберите профиль тестирования</h4>
-        {{range $i, $p := .Profiles}}
+        {{range $i, $p := .Data.Profiles}}
         <div class="form-check">
             <input class="form-check-input" type="radio" name="TASK_PROFILE_ID" id="profile_{{$p.Id}}" value="{{$p.Id}}">
             <label class="form-check-label" for="profile_{{$p.Id}}">{{$p.Text}}</label>

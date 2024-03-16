@@ -19,12 +19,12 @@
         <div id="progress-bar" class="progress-bar" style="width: 0"></div>
     </div>
     <div class="container">
-        <h4 class="text-secondary">{{.Profile.Text}}</h4>
-        <h6 class="text-secondary">Работник: {{getFullName .User}}</h6>
+        <h6 class="text-secondary">Работник: {{getFullName .Session.User}}</h6>
+        <h4 class="text-secondary">{{.Session.Profile.Text}}</h4>
         <form action="/test" method="post" class="mb-5">
-            <input type="hidden" name="profile_id" value="{{.Profile.Id}}">
-            <input type="hidden" name="userId" value="{{.User.Id}}">
-            {{range $i, $card := .Cards}}
+            <input type="hidden" name="profile_id" value="{{.Session.Profile.Id}}">
+            <input type="hidden" name="userId" value="{{.Session.User.Id}}">
+            {{range $i, $card := .Data.Cards}}
             <div class="js-card{{if eq $i 0}} js-current{{else}} d-none{{end}} mb-5">
                 <input type="hidden" name="question_{{$card.Id}}_id" value="{{$card.Id}}">
                 <h5>Вопрос №{{inc $i}}</h5>
@@ -39,7 +39,7 @@
                 <div class="text-body mt-1 fw-normal">
                 {{range $j, $o := $card.Options}}
                     <div class="form-check mb-3">
-                        <label class="form-check-label" for="">
+                        <label class="form-check-label" for="option_{{$o.Id}}">
                         <input class="form-check-input" type="{{type $card}}" name="answer_on_question_{{$card.Id}}"
                             id="option_{{$o.Id}}" value="{{$o.Id}}"> {{$o.Text}}
                         </label>

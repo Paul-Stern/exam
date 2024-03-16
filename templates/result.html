@@ -11,10 +11,11 @@
 </head>
 <body>
     <main>
+        <h6 class="text-secondary">Работник: {{getFullName .Session.User}}</h6>
         <h3>Результат тестирования</h3>
         <div>
-        <h4>Процент верных ответов: {{.Percent}}%</h4>
-        {{if .Certified}}
+        <h4>Процент верных ответов: {{.Data.Percent}}%</h4>
+        {{if .Data.Certified}}
         <h5>Вы сертифицированы</h5>
         <p>Сертификат будет отправлен по электронной почте.</p>
         {{end}}

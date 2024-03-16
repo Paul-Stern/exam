@@ -20,8 +20,8 @@ import (
 type Answer int
 
 type session struct {
-	user    User
-	profile TestProfile
+	User    User
+	Profile TestProfile
 	expiry  time.Time
 	start   time.Time
 	result  ResultStore
@@ -124,19 +124,23 @@ func testHandler(w http.ResponseWriter, r *http.Request) {
 	case "GET":
 		var t Test
 		// get user from session
-		profid := strconv.Itoa(ses.profile.Id)
+		profid := strconv.Itoa(ses.Profile.Id)
 		// get tasks
 		tasks, _ := getTasks(profid)
 		c := getCards(tasks)
 		// Create test
-		t = newTest(ses.user, c, ses.profile)
+		t = newTest(ses.User, c, ses.Profile)
 		ses.start = t.Time.Start
 		http.SetCookie(w, &http.Cookie{
 			Name:  "testing_start",
 			Value: t.Time.Start.Format(time.RFC3339),
 		})
 		// http.SetCookie(w, profid)
-		renderTemplate(w, "test", &t)
+		data := TemplateData{
+			Data:    t,
+			Session: ses,
+		}
+		renderTemplate(w, "test", &data)
 	case "POST":
 		// Get data from form
 		if err := r.ParseForm(); err != nil {
@@ -201,7 +205,7 @@ func signInHandler(w http.ResponseWriter, r *http.Request) {
 
 		// save data to session
 		sessions[sessionToken] = session{
-			user:   u,
+			User:   u,
 			expiry: expiresAt,
 		}
 		cookie := http.Cookie{}
@@ -251,9 +255,13 @@ func profilesHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		var profiles Profiles
-		// get tasks
+		// get profiles
 		profiles, _ = getProfiles()
-		renderTemplate(w, "profiles", &profiles)
+		// Create template data
+		data := TemplateData{Data: profiles, Session: ses}
+
+		// renderTemplate(w, "profiles", &profiles)
+		renderTemplate(w, "profiles", &data)
 	case http.MethodPost:
 		if err := r.ParseForm(); err != nil {
 			log.Printf("ParseForm() err: %v", err)
@@ -269,7 +277,7 @@ func profilesHandler(w http.ResponseWriter, r *http.Request) {
 			Text: ptext,
 		}
 
-		ses.profile = profile
+		ses.Profile = profile
 		// Save session
 		sessions[sesCookie.Value] = ses
 		http.Redirect(w, r, "/test", http.StatusFound)
@@ -286,7 +294,11 @@ func resultHandler(w http.ResponseWriter, r *http.Request) {
 	result, _ := getResult(ses.result.Id)
 	// test scenario
 	// result, _ := getResult(255)
-	renderTemplate(w, "result", result)
+	data := TemplateData{
+		Data:    result,
+		Session: ses,
+	}
+	renderTemplate(w, "result", &data)
 }
 
 func successHandler(w http.ResponseWriter, r *http.Request) {
