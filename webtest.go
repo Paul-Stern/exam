@@ -69,6 +69,7 @@ func main() {
 	http.HandleFunc("/profiles", profilesHandler)
 	http.HandleFunc("/test", testHandler)
 	http.HandleFunc("/result", resultHandler)
+	http.HandleFunc("/logout", logout)
 	http.HandleFunc("/success", successHandler)
 	// Helps to test getting answers over post
 	log.Printf("Version: %s\n", version)
@@ -300,6 +301,17 @@ func resultHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	renderTemplate(w, "result", &data)
 }
+
+func logout(w http.ResponseWriter, r *http.Request) {
+	sesCookie, _ := r.Cookie("gosesid")
+	delete(sessions, sesCookie.Value)
+	http.Redirect(w, r, "/login", http.StatusFound)
+}
+
+// func getSession(r *http.Request) session {
+// 	cookie, _ := r.Cookie("gosesid")
+// 	return sessions[cookie.Value]
+// }
 
 func successHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, successPage)
