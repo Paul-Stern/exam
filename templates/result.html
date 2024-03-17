@@ -11,13 +11,15 @@
 </head>
 <body>
     <main>
+        <h6 class="text-secondary">Работник: {{getFullName .Session.User}}</h6>
         <h3>Результат тестирования</h3>
         <div>
-        <h4>Процент верных ответов: {{.Percent}}%</h4>
-        {{if .Certified}}
+        <h4>Процент верных ответов: {{.Data.Percent}}%</h4>
+        {{if .Data.Certified}}
         <h5>Вы сертифицированы</h5>
         <p>Сертификат будет отправлен по электронной почте.</p>
         {{end}}
+        <a href="/logout" class="btn btn-primary">Выйти</a>
     </main>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
