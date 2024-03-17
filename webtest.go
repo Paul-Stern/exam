@@ -74,8 +74,8 @@ func main() {
 	// Helps to test getting answers over post
 	log.Printf("Version: %s\n", version)
 	// paths to the cert and the key
-	log.Printf("Server started. Listening to %s:%s", cfg.Server.Host, cfg.Server.Port)
-	log.Fatal(http.ListenAndServeTLS(cfg.Server.Host+":"+cfg.Server.Port, cfg.Server.Cert, cfg.Server.Key, nil))
+	log.Printf("Server started. Listening to %s:%s", cfg.Server.Addr, cfg.Server.Port)
+	log.Fatal(http.ListenAndServeTLS(cfg.Server.Addr+":"+cfg.Server.Port, cfg.Server.Cert, cfg.Server.Key, nil))
 }
 func processError(err error) {
 	fmt.Println(err)
