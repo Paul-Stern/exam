@@ -64,7 +64,7 @@ func main() {
 		version = "dev"
 	}
 
-	cert(255)
+	// cert(255)
 	http.HandleFunc("/login", signInHandler)
 	http.HandleFunc("/signup", signUpHandler)
 	http.HandleFunc("/profiles", profilesHandler)
@@ -410,19 +410,7 @@ func cert(id int) (err error) {
 	if err != nil {
 		return
 	}
-	_, err = os.Stat("./tmp")
-	if os.IsNotExist(err) {
-		os.Mkdir("tmp", 0755)
-	}
-	f, err := os.CreateTemp("./tmp", "cert-*.pdf")
-	if err != nil {
-		return
-	}
-	defer f.Close()
-	_, err = f.Write(data)
-	if err != nil {
-		return
-	}
+	saveCert(data)
 	return nil
 }
 

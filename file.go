@@ -19,3 +19,19 @@ func clearTmp() (err error) {
 	log.Println("clearTmp: tmp dir successfully cleared")
 	return nil
 }
+func saveCert(data []byte) (name string, err error) {
+	if os.IsNotExist(err) {
+		os.Mkdir("tmp", 0755)
+	}
+	f, err := os.CreateTemp("./tmp", "cert-*.pdf")
+	if err != nil {
+		return
+	}
+	defer f.Close()
+	_, err = f.Write(data)
+	if err != nil {
+		return
+	}
+	log.Printf("saveCert: successfully saved cert: %s\n", f.Name())
+	return f.Name(), err
+}
