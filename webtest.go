@@ -120,7 +120,13 @@ func testHandler(w http.ResponseWriter, r *http.Request) {
 	// get session id from cookie
 	sesCookie, _ := r.Cookie("gosesid")
 	// get session data
-	ses := sessions[sesCookie.Value]
+	ses, exists := sessions[sesCookie.Value]
+	// Redirect to login if not in session
+	if !exists {
+		// w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/login", http.StatusFound)
+		return
+	}
 	switch r.Method {
 	case "GET":
 		var t Test
@@ -251,7 +257,12 @@ func signUpHandler(w http.ResponseWriter, r *http.Request) {
 func profilesHandler(w http.ResponseWriter, r *http.Request) {
 	// Get session id from cookie
 	sesCookie, _ := r.Cookie("gosesid")
-	ses := sessions[sesCookie.Value]
+	ses, exists := sessions[sesCookie.Value]
+	// Redirect to login if not in session
+	if !exists {
+		http.Redirect(w, r, "/login", http.StatusFound)
+		return
+	}
 
 	switch r.Method {
 	case http.MethodGet:
@@ -291,7 +302,12 @@ func resultHandler(w http.ResponseWriter, r *http.Request) {
 	// get session id from cookie
 	sesCookie, _ := r.Cookie("gosesid")
 	// get session data
-	ses := sessions[sesCookie.Value]
+	ses, exists := sessions[sesCookie.Value]
+	// Redirect to login if not in session
+	if !exists {
+		http.Redirect(w, r, "/login", http.StatusFound)
+		return
+	}
 	result, _ := getResult(ses.result.Id)
 	// test scenario
 	// result, _ := getResult(255)
