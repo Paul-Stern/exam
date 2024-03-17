@@ -64,6 +64,7 @@ func main() {
 		version = "dev"
 	}
 
+	cert(255)
 	http.HandleFunc("/login", signInHandler)
 	http.HandleFunc("/signup", signUpHandler)
 	http.HandleFunc("/profiles", profilesHandler)
@@ -396,6 +397,33 @@ func getResult(id int) (result ResultStore, err error) {
 	result = m.Data
 	return
 
+}
+
+func cert(id int) (err error) {
+	testID := strconv.Itoa(id)
+	url := baseUrl(cfg) + "/tests/" + testID + "/cert"
+	resp, err := http.Get(url)
+	if err != nil {
+		return
+	}
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return
+	}
+	_, err = os.Stat("./tmp")
+	if os.IsNotExist(err) {
+		os.Mkdir("tmp", 0755)
+	}
+	f, err := os.CreateTemp("./tmp", "cert-*.pdf")
+	if err != nil {
+		return
+	}
+	defer f.Close()
+	_, err = f.Write(data)
+	if err != nil {
+		return
+	}
+	return nil
 }
 
 func readCreds(f url.Values) Credentials {
