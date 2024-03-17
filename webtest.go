@@ -74,8 +74,8 @@ func main() {
 	// Helps to test getting answers over post
 	log.Printf("Version: %s\n", version)
 	// paths to the cert and the key
-	log.Fatal(http.ListenAndServeTLS(cfg.Server.Host+":"+cfg.Server.Port, cfg.Server.Cert, cfg.Server.Key, nil))
 	log.Printf("Server started. Listening to %s:%s", cfg.Server.Host, cfg.Server.Port)
+	log.Fatal(http.ListenAndServeTLS(cfg.Server.Host+":"+cfg.Server.Port, cfg.Server.Cert, cfg.Server.Key, nil))
 }
 func processError(err error) {
 	fmt.Println(err)
@@ -322,7 +322,7 @@ func resultHandler(w http.ResponseWriter, r *http.Request) {
 func logout(w http.ResponseWriter, r *http.Request) {
 	sesCookie, _ := r.Cookie("gosesid")
 	delete(sessions, sesCookie.Value)
-	/* Doesn't work:
+	/* // Doesn't work:
 	// Remove session token cookie
 	sesCookie.MaxAge = 0
 	http.SetCookie(w, sesCookie)
