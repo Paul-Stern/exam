@@ -2,8 +2,10 @@ package main
 
 import (
 	_ "embed"
+	"flag"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/kardianos/service"
 )
@@ -41,7 +43,11 @@ func (p *program) Stop(s service.Service) error {
 	return nil
 }
 
+// install flag value
+var installFlag, runFlag bool
+
 func main() {
+	flag.Parse()
 	readConf(&cfg)
 	err := LoadTemplates()
 	if err != nil {
@@ -50,6 +56,7 @@ func main() {
 	if version == "" {
 		version = "dev"
 	}
+	// Create service configuration
 	svcConfig := &service.Config{
 		Name:        "WebtestService",
 		DisplayName: "Webtest Service",
@@ -61,6 +68,7 @@ func main() {
 	}
 
 	prg := &program{}
+	// Create service
 	s, err := service.New(prg, svcConfig)
 	if err != nil {
 		log.Fatal(err)
@@ -69,15 +77,25 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = s.Install()
-	if err != nil {
-		logger.Error(err)
-	} else {
-		log.Println("Service installed")
+	// Install the service if -install provided
+	if installFlag {
+		err = s.Install()
+		if err != nil {
+			logger.Error(err)
+		} else {
+			log.Println("Service installed")
+		}
+		// Exit the app
+		os.Exit(0)
 	}
 	err = s.Run()
 	if err != nil {
 		logger.Error(err)
 	}
 
+}
+
+func init() {
+	flag.BoolVar(&installFlag, "install", false, "")
+	flag.BoolVar(&runFlag, "run", false, "")
 }
