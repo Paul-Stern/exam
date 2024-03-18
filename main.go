@@ -44,7 +44,7 @@ func (p *program) Stop(s service.Service) error {
 }
 
 // install flag value
-var installFlag, runFlag bool
+var installFlag, uninstallFlag, runFlag bool
 
 func main() {
 	flag.Parse()
@@ -88,6 +88,16 @@ func main() {
 		// Exit the app
 		os.Exit(0)
 	}
+	if uninstallFlag {
+		err = s.Uninstall()
+		if err != nil {
+			logger.Error(err)
+		} else {
+			log.Println("Service uninstalled")
+		}
+		// Exit the app
+		os.Exit(0)
+	}
 	err = s.Run()
 	if err != nil {
 		logger.Error(err)
@@ -97,5 +107,6 @@ func main() {
 
 func init() {
 	flag.BoolVar(&installFlag, "install", false, "")
+	flag.BoolVar(&uninstallFlag, "uninstall", false, "")
 	flag.BoolVar(&runFlag, "run", false, "")
 }
