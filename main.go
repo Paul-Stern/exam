@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 
 	"github.com/kardianos/service"
 )
@@ -24,6 +25,10 @@ func (p *program) Start(s service.Service) error {
 }
 func (p *program) run() {
 	// cert(255)
+	addr := os.Getenv("WEBSITE_HOSTNAME")
+	port := os.Getenv("SERVER_PORT")
+	cert := os.Getenv("CERT")
+	key := os.Getenv("KEY")
 	http.HandleFunc("/login", signInHandler)
 	http.HandleFunc("/signup", signUpHandler)
 	http.HandleFunc("/profiles", profilesHandler)
@@ -34,8 +39,8 @@ func (p *program) run() {
 	// Helps to test getting answers over post
 	log.Printf("Version: %s\n", version)
 	// paths to the cert and the key
-	log.Printf("Server started. Listening to %s:%s", cfg.Server.Addr, cfg.Server.Port)
-	log.Fatal(http.ListenAndServeTLS(cfg.Server.Addr+":"+cfg.Server.Port, cfg.Server.Cert, cfg.Server.Key, nil))
+	log.Printf("Server started. Listening to %s:%s", addr, port)
+	log.Fatal(http.ListenAndServeTLS(addr+":"+port, cert, key, nil))
 }
 func (p *program) Stop(s service.Service) error {
 	// Stop should not block. Return with a few seconds.
@@ -57,6 +62,14 @@ func main() {
 		version = "dev"
 	}
 	// Create service configuration
+	keypath, err := filepath.Abs(cfg.Server.Key)
+	if err != nil {
+		log.Fatalf("Key path error: %v", err)
+	}
+	certpath, err := filepath.Abs(cfg.Server.Cert)
+	if err != nil {
+		log.Fatalf("Cert path error: %v", err)
+	}
 	svcConfig := &service.Config{
 		Name:        "WebtestService",
 		DisplayName: "Webtest Service",
@@ -64,6 +77,12 @@ func main() {
 		Option: service.KeyValue{
 			"UserService": true,
 			"Interactive": true,
+		},
+		EnvVars: map[string]string{
+			"WEBSITE_HOSTNAME": cfg.Server.Addr,
+			"SERVER_PORT":      cfg.Server.Port,
+			"KEY":              keypath,
+			"CERT":             certpath,
 		},
 	}
 
