@@ -19,7 +19,7 @@
         <div id="progress-bar" class="progress-bar" style="width: 0"></div>
     </div>
     <div class="container">
-        <h6 class="text-secondary">Работник: {{getFullName .Session.User}}</h6>
+        <h6 class="text-secondary">Аттестуемый: {{getFullName .Session.User}}</h6>
         <h4 class="text-secondary">{{.Session.Profile.Text}}</h4>
         <form action="/test" method="post" class="mb-5">
             <input type="hidden" name="profile_id" value="{{.Session.Profile.Id}}">

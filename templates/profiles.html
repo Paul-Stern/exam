@@ -11,7 +11,7 @@
 </head>
 <body class="container">
     <form action="/profiles" method="post" class="row">
-        <h6 class="text-secondary">Работник: {{getFullName .Session.User}}</h6>
+        <h6 class="text-secondary">Аттестуемый: {{getFullName .Session.User}}</h6>
         <h4>Выберите профиль тестирования</h4>
         {{range $i, $p := .Data.Profiles}}
         <div class="form-check">
