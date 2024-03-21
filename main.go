@@ -10,7 +10,6 @@ import (
 var version string
 
 func main() {
-	readConf(&cfg)
 	err := LoadTemplates()
 	if err != nil {
 		log.Fatalf("LoadTemplates error: %v", err)
@@ -20,6 +19,7 @@ func main() {
 	}
 
 	// cert(255)
+	testEmail()
 	http.HandleFunc("/login", signInHandler)
 	http.HandleFunc("/signup", signUpHandler)
 	http.HandleFunc("/profiles", profilesHandler)
@@ -32,4 +32,8 @@ func main() {
 	// paths to the cert and the key
 	log.Printf("Server started. Listening to %s:%s", cfg.Server.Addr, cfg.Server.Port)
 	log.Fatal(http.ListenAndServeTLS(cfg.Server.Addr+":"+cfg.Server.Port, cfg.Server.Cert, cfg.Server.Key, nil))
+}
+
+func init() {
+	readConf(&cfg)
 }

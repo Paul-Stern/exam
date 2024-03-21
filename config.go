@@ -26,6 +26,12 @@ type Config struct {
 			Authenticate    string `yaml:"authenticate"`
 		} `yaml:"nodes"`
 	} `yaml:"rest"`
+	SMTP struct {
+		User string `yaml:"user"`
+		Port string `yaml:"port"`
+		Host string `yaml:"host"`
+		Pswd string `yaml:"password"`
+	} `yaml:"smtp"`
 }
 
 func readConf(cfg *Config) {
