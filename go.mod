@@ -1,4 +1,4 @@
-module github.com/Paul-Stern/webtest
+module github.com/Paul-Stern/exam
 
 go 1.21.1
 
