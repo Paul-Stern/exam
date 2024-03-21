@@ -1,4 +1,4 @@
-module heywood/webtest
+module github.com/Paul-Stern/webtest
 
 go 1.21.1
 
