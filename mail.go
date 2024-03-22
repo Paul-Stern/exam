@@ -123,7 +123,7 @@ func (m *EmailMessage) ToBytes() []byte {
 
 func testEmail() {
 	initMail()
-	m := NewMessage("Test", "This is a test message")
+	m := NewMessage("Тест", "Это тестовое письмо")
 	m.From = user
 	m.To = append(m.To, "user@example.com")
 	m.AttachFile("tmp/cert-2709233084.pdf")

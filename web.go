@@ -292,6 +292,31 @@ func resultHandler(w http.ResponseWriter, r *http.Request) {
 		Session: ses,
 	}
 	renderTemplate(w, "result", &data)
+	if result.Certified {
+		c, err := cert(result.Id)
+		if err != nil {
+			log.Print(err)
+			return
+		}
+		log.Print(c)
+		s := "Аттестация ЯОКБ"
+		b := "Поздарвляем с успешной аттестацией! Сертификат прикреплен в приложении."
+		m := NewMessage(s, b)
+		m.To = append(m.To, ses.User.Auth.Email)
+		m.From = cfg.SMTP.User
+		err = m.AttachFile(c)
+		if err != nil {
+			log.Print(err)
+			return
+		}
+		sndr := NewSender()
+		err = sndr.Send(m)
+		if err != nil {
+			log.Print(err)
+			return
+		}
+		log.Print("Successfully emailed certificate")
+	}
 }
 
 func logout(w http.ResponseWriter, r *http.Request) {
@@ -373,7 +398,7 @@ func getResult(id int) (result ResultStore, err error) {
 
 }
 
-func cert(id int) (err error) {
+func cert(id int) (name string, err error) {
 	testID := strconv.Itoa(id)
 	url := baseUrl(cfg) + "/tests/" + testID + "/cert"
 	resp, err := http.Get(url)
@@ -384,8 +409,8 @@ func cert(id int) (err error) {
 	if err != nil {
 		return
 	}
-	saveCert(data)
-	return nil
+	name, err = saveCert(data)
+	return
 }
 
 func readCreds(f url.Values) Credentials {
