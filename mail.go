@@ -100,14 +100,14 @@ func (m *EmailMessage) ToBytes() []byte {
 	buf.WriteString(fmt.Sprintf("\n\n--%s\n", boundary))
 	buf.WriteString(fmt.Sprintf("Content-Type: %s\r\n\r\n", http.DetectContentType([]byte(m.Body))))
 	// buf.WriteString("Content-Transfer-Encoding: 7bit\n")
-	buf.WriteString(m.Body)
-	buf.WriteString(fmt.Sprintf("\n--%s--", boundary))
+	buf.WriteString(fmt.Sprintf("%s\r\n", m.Body))
+	// buf.WriteString(fmt.Sprintf("\n--%s--", boundary))
 	if withAttachments {
 		for k, v := range m.Attachments {
 			buf.WriteString(fmt.Sprintf("\n\n--%s\n", boundary))
 			buf.WriteString(fmt.Sprintf("Content-Type: %s\n", http.DetectContentType(v)))
 			buf.WriteString("Content-Transfer-Encoding: base64\n")
-			buf.WriteString(fmt.Sprintf("Content-Disposition: attachment; filename=%s\n", k))
+			buf.WriteString(fmt.Sprintf("Content-Disposition: attachment; filename=%s\r\n\r\n", k))
 
 			b := make([]byte, base64.StdEncoding.EncodedLen(len(v)))
 			base64.StdEncoding.Encode(b, v)
