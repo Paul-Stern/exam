@@ -409,12 +409,3 @@ func read[DT DataTypes](r *http.Response) (m Message[DT], err error) {
 	}
 	return
 }
-
-func testEmail() {
-	initMail()
-	m := NewMessage("Test", "This is a test message")
-	m.AttachFile("tmp/cert-2709233084.pdf")
-	s := NewSender()
-	err := s.Send(m)
-	log.Print(err)
-}

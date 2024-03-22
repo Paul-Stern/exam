@@ -4,17 +4,21 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
+	"log"
 	"mime/multipart"
 	"net/http"
 	"net/smtp"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 var user, host, port, password string
 
 type EmailMessage struct {
+	Date        time.Time
+	From        string
 	To          []string
 	CC          []string
 	BCC         []string
@@ -45,7 +49,12 @@ func (s *Sender) Send(m *EmailMessage) error {
 }
 
 func NewMessage(s, b string) *EmailMessage {
-	return &EmailMessage{Subject: s, Body: b, Attachments: make(map[string][]byte)}
+	return &EmailMessage{
+		Subject:     s,
+		Date:        time.Now(),
+		Body:        b,
+		Attachments: make(map[string][]byte),
+	}
 }
 
 func MailCert() {
@@ -66,8 +75,10 @@ func (m *EmailMessage) AttachFile(src string) error {
 func (m *EmailMessage) ToBytes() []byte {
 	buf := bytes.NewBuffer(nil)
 	withAttachments := len(m.Attachments) > 0
-	buf.WriteString(fmt.Sprintf("Subject: %s\n", m.Subject))
+	buf.WriteString(fmt.Sprintf("Date: %s\n", m.Date.Format(time.RFC822)))
+	buf.WriteString(fmt.Sprintf("From: %s\n", m.From))
 	buf.WriteString(fmt.Sprintf("To: %s\n", strings.Join(m.To, ",")))
+	buf.WriteString(fmt.Sprintf("Subject: %s\n", m.Subject))
 	if len(m.CC) > 0 {
 		buf.WriteString(fmt.Sprintf("Cc: %s\n", strings.Join(m.CC, ",")))
 	}
@@ -86,7 +97,11 @@ func (m *EmailMessage) ToBytes() []byte {
 		buf.WriteString("Content-Type: text/plain; charset=utf-8\n")
 	}
 
+	buf.WriteString(fmt.Sprintf("\n\n--%s\n", boundary))
+	buf.WriteString(fmt.Sprintf("Content-Type: %s\r\n\r\n", http.DetectContentType([]byte(m.Body))))
+	// buf.WriteString("Content-Transfer-Encoding: 7bit\n")
 	buf.WriteString(m.Body)
+	buf.WriteString(fmt.Sprintf("\n--%s--", boundary))
 	if withAttachments {
 		for k, v := range m.Attachments {
 			buf.WriteString(fmt.Sprintf("\n\n--%s\n", boundary))
@@ -104,4 +119,15 @@ func (m *EmailMessage) ToBytes() []byte {
 	}
 
 	return buf.Bytes()
+}
+
+func testEmail() {
+	initMail()
+	m := NewMessage("Test", "This is a test message")
+	m.From = user
+	m.To = append(m.To, "user@example.com")
+	m.AttachFile("tmp/cert-2709233084.pdf")
+	s := NewSender()
+	err := s.Send(m)
+	log.Print(err)
 }
