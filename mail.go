@@ -41,6 +41,7 @@ func initMail() {
 
 func NewSender() *Sender {
 	auth := smtp.PlainAuth("", user, password, host)
+	log.Printf("Auth: %+v", auth)
 	return &Sender{auth}
 }
 
@@ -125,8 +126,8 @@ func testEmail() {
 	initMail()
 	m := NewMessage("Тест", "Это тестовое письмо")
 	m.From = user
-	m.To = append(m.To, "user@example.com")
-	m.AttachFile("tmp/cert-2709233084.pdf")
+	m.To = append(m.To, cfg.SMTP.TestAddr)
+	// m.AttachFile("tmp/cert-2709233084.pdf")
 	s := NewSender()
 	err := s.Send(m)
 	log.Print(err)

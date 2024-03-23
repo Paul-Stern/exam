@@ -19,7 +19,7 @@ func main() {
 	}
 
 	// cert(255)
-	// testEmail()
+	testEmail()
 	http.HandleFunc("/login", signInHandler)
 	http.HandleFunc("/signup", signUpHandler)
 	http.HandleFunc("/profiles", profilesHandler)

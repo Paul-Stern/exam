@@ -27,10 +27,11 @@ type Config struct {
 		} `yaml:"nodes"`
 	} `yaml:"rest"`
 	SMTP struct {
-		User string `yaml:"user"`
-		Port string `yaml:"port"`
-		Host string `yaml:"host"`
-		Pswd string `yaml:"password"`
+		User     string `yaml:"user"`
+		Port     string `yaml:"port"`
+		Host     string `yaml:"host"`
+		Pswd     string `yaml:"password"`
+		TestAddr string `yaml:"test-address"`
 	} `yaml:"smtp"`
 }
 
