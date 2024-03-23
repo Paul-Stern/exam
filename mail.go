@@ -122,13 +122,21 @@ func (m *EmailMessage) ToBytes() []byte {
 	return buf.Bytes()
 }
 
-func testEmail() {
+func testEmail() (err error) {
 	initMail()
+	c, err := smtp.Dial(fmt.Sprintf("%s:%s", cfg.SMTP.Host, cfg.SMTP.Port))
+	if err != nil {
+		log.Printf("Mail error: %s\nClient info: %+v", err, c)
+		return
+	}
+	log.Printf("Successfully connected to smtp server: %+v", c)
+	// c.Noop()
 	m := NewMessage("Тест", "Это тестовое письмо")
 	m.From = user
 	m.To = append(m.To, cfg.SMTP.TestAddr)
 	// m.AttachFile("tmp/cert-2709233084.pdf")
 	s := NewSender()
-	err := s.Send(m)
+	err = s.Send(m)
 	log.Print(err)
+	return
 }
