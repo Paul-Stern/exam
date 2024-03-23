@@ -293,7 +293,7 @@ func resultHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	renderTemplate(w, "result", &data)
 	if result.Certified {
-		c, err := cert(result.Id)
+		c, err := cert(ses.result.Id)
 		if err != nil {
 			log.Print(err)
 			return
