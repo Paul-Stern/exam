@@ -19,6 +19,7 @@ func main() {
 	}
 
 	// cert(255)
+	log.Printf("Version: %s\n", version)
 	testEmail()
 	http.HandleFunc("/login", signInHandler)
 	http.HandleFunc("/signup", signUpHandler)
@@ -27,8 +28,6 @@ func main() {
 	http.HandleFunc("/result", resultHandler)
 	http.HandleFunc("/logout", logout)
 	http.HandleFunc("/success", successHandler)
-	// Helps to test getting answers over post
-	log.Printf("Version: %s\n", version)
 	// paths to the cert and the key
 	log.Printf("Server started. Listening to %s:%s", cfg.Server.Addr, cfg.Server.Port)
 	log.Fatal(http.ListenAndServeTLS(cfg.Server.Addr+":"+cfg.Server.Port, cfg.Server.Cert, cfg.Server.Key, nil))

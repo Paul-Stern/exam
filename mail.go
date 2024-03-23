@@ -123,6 +123,7 @@ func (m *EmailMessage) ToBytes() []byte {
 }
 
 func testEmail() (err error) {
+	log.Print("Start testing mail services")
 	initMail()
 	c, err := smtp.Dial(fmt.Sprintf("%s:%s", cfg.SMTP.Host, cfg.SMTP.Port))
 	if err != nil {
