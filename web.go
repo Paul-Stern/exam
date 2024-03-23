@@ -299,6 +299,7 @@ func resultHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		log.Print(c)
+		initMail()
 		s := "Аттестация ЯОКБ"
 		b := "Поздарвляем с успешной аттестацией! Сертификат прикреплен в приложении."
 		m := NewMessage(s, b)
