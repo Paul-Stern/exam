@@ -1,3 +1,4 @@
+// TODO: Export 'mail' to separate package
 package main
 
 import (
@@ -14,6 +15,7 @@ import (
 	"time"
 )
 
+// TODO: make local to mail package
 var mailUser, mailHost, mailPort, mailPassword string
 
 type EmailMessage struct {
@@ -32,21 +34,21 @@ type Sender struct {
 }
 
 func initMail() {
-	user = cfg.SMTP.User
-	host = cfg.SMTP.Host
-	port = cfg.SMTP.Port
-	password = cfg.SMTP.Pswd
+	mailUser = cfg.SMTP.User
+	mailHost = cfg.SMTP.Host
+	mailPort = cfg.SMTP.Port
+	mailPassword = cfg.SMTP.Pswd
 
 }
 
 func NewSender() *Sender {
-	auth := smtp.PlainAuth("", user, password, host)
+	auth := smtp.PlainAuth("", mailUser, mailPassword, mailHost)
 	log.Printf("Auth: %+v", auth)
 	return &Sender{auth}
 }
 
 func (s *Sender) Send(m *EmailMessage) error {
-	return smtp.SendMail(fmt.Sprintf("%s:%s", host, port), s.auth, user, m.To, m.ToBytes())
+	return smtp.SendMail(fmt.Sprintf("%s:%s", mailHost, mailPort), s.auth, mailUser, m.To, m.ToBytes())
 }
 
 func NewMessage(s, b string) *EmailMessage {
@@ -132,7 +134,7 @@ func testEmail() (err error) {
 		return
 	}
 	m := NewMessage("Тест", "Это тестовое письмо")
-	m.From = user
+	m.From = mailUser
 	m.To = append(m.To, cfg.SMTP.TestAddr)
 	// m.AttachFile("tmp/cert-2709233084.pdf")
 	s := NewSender()
