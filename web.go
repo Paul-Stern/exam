@@ -301,7 +301,7 @@ func resultHandler(w http.ResponseWriter, r *http.Request) {
 		log.Print(c)
 		initMail()
 		s := "Аттестация ЯОКБ"
-		b := "Поздарвляем с успешной аттестацией! Сертификат прикреплен в приложении."
+		b := "Поздравляем с успешной аттестацией! Сертификат прикреплен в приложении."
 		m := NewMessage(s, b)
 		m.To = append(m.To, ses.User.Auth.Email)
 		m.From = cfg.SMTP.User
