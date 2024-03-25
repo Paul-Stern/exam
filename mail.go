@@ -127,6 +127,11 @@ func testEmail() (err error) {
 	}
 	log.Printf("Successfully connected to smtp server: %+v", c)
 	// c.Noop()
+	if cfg.SMTP.TestAddr != "" {
+		log.Printf("No testing address. Test message won't be sent")
+		log.Printf("Email service: success")
+		return
+	}
 	m := NewMessage("Тест", "Это тестовое письмо")
 	m.From = user
 	m.To = append(m.To, cfg.SMTP.TestAddr)
