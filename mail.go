@@ -79,7 +79,12 @@ func (m *EmailMessage) ToBytes() []byte {
 	buf.WriteString(fmt.Sprintf("Date: %s\n", m.Date.Format(time.RFC822)))
 	buf.WriteString(fmt.Sprintf("From: %s\n", m.From))
 	buf.WriteString(fmt.Sprintf("To: %s\n", strings.Join(m.To, ",")))
-	buf.WriteString(fmt.Sprintf("Subject: %s\n", m.Subject))
+	buf.WriteString(
+		fmt.Sprintf(
+			"Subject: =?UTF-8?B?%s?=\n",
+			base64.StdEncoding.EncodeToString([]byte(m.Subject)),
+		),
+	)
 	if len(m.CC) > 0 {
 		buf.WriteString(fmt.Sprintf("Cc: %s\n", strings.Join(m.CC, ",")))
 	}
