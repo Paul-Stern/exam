@@ -19,7 +19,9 @@ func clearTmp() (err error) {
 	log.Println("clearTmp: tmp dir successfully cleared")
 	return nil
 }
+
 func saveCert(data []byte) (name string, err error) {
+	_, err = os.ReadDir("tmp")
 	if os.IsNotExist(err) {
 		os.Mkdir("tmp", 0755)
 	}
