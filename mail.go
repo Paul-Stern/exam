@@ -73,6 +73,8 @@ func (m *EmailMessage) AttachFile(src string) error {
 	return nil
 }
 
+// TODO: Wrap long lines (MUST be no more than 998 and should be less 79)
+// https://datatracker.ietf.org/doc/html/rfc2822#section-2.1.1
 func (m *EmailMessage) ToBytes() []byte {
 	buf := bytes.NewBuffer(nil)
 	withAttachments := len(m.Attachments) > 0
