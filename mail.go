@@ -91,21 +91,14 @@ func (m *EmailMessage) ToBytes() []byte {
 	buf.WriteString("MIME-Version: 1.0\n")
 	writer := multipart.NewWriter(buf)
 	boundary := writer.Boundary()
-	if withAttachments {
-		buf.WriteString(fmt.Sprintf("Content-Type: multipart/mixed; boundary=%s\n", boundary))
-		buf.WriteString(fmt.Sprintf("--%s\n", boundary))
-	} else {
-		buf.WriteString("Content-Type: text/plain; charset=utf-8\n")
-	}
+	buf.WriteString(fmt.Sprintf("Content-Type: multipart/mixed; boundary=%s\r\n\r\n", boundary))
 
-	buf.WriteString(fmt.Sprintf("\n\n--%s\n", boundary))
+	buf.WriteString(fmt.Sprintf("--%s\r\n", boundary))
 	buf.WriteString(fmt.Sprintf("Content-Type: %s\r\n\r\n", http.DetectContentType([]byte(m.Body))))
-	// buf.WriteString("Content-Transfer-Encoding: 7bit\n")
 	buf.WriteString(fmt.Sprintf("%s\r\n", m.Body))
-	// buf.WriteString(fmt.Sprintf("\n--%s--", boundary))
 	if withAttachments {
 		for k, v := range m.Attachments {
-			buf.WriteString(fmt.Sprintf("\n\n--%s\n", boundary))
+			buf.WriteString(fmt.Sprintf("\r\n--%s\n", boundary))
 			buf.WriteString(fmt.Sprintf("Content-Type: %s\n", http.DetectContentType(v)))
 			buf.WriteString("Content-Transfer-Encoding: base64\n")
 			buf.WriteString(fmt.Sprintf("Content-Disposition: attachment; filename=%s\r\n\r\n", k))
@@ -113,11 +106,13 @@ func (m *EmailMessage) ToBytes() []byte {
 			b := make([]byte, base64.StdEncoding.EncodedLen(len(v)))
 			base64.StdEncoding.Encode(b, v)
 			buf.Write(b)
-			buf.WriteString(fmt.Sprintf("\n--%s", boundary))
+			buf.WriteString("\r\n")
+			// buf.WriteString(fmt.Sprintf("\r\n\r\n--%s", boundary))
 		}
 
-		buf.WriteString("--")
+		// buf.WriteString("--")
 	}
+	buf.WriteString(fmt.Sprintf("\r\n--%s--", boundary))
 
 	return buf.Bytes()
 }
