@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-var user, host, port, password string
+var mailUser, mailHost, mailPort, mailPassword string
 
 type EmailMessage struct {
 	Date        time.Time
@@ -56,10 +56,6 @@ func NewMessage(s, b string) *EmailMessage {
 		Body:        b,
 		Attachments: make(map[string][]byte),
 	}
-}
-
-func MailCert() {
-	// auth := smtp.PlainAuth("", cfg.SMTP.User, cfg.SMTP.Pswd, cfg.SMTP.Host)
 }
 
 func (m *EmailMessage) AttachFile(src string) error {
@@ -114,10 +110,7 @@ func (m *EmailMessage) ToBytes() []byte {
 			base64.StdEncoding.Encode(b, v)
 			buf.Write(b)
 			buf.WriteString("\r\n")
-			// buf.WriteString(fmt.Sprintf("\r\n\r\n--%s", boundary))
 		}
-
-		// buf.WriteString("--")
 	}
 	buf.WriteString(fmt.Sprintf("\r\n--%s--", boundary))
 
@@ -133,7 +126,6 @@ func testEmail() (err error) {
 		return
 	}
 	log.Printf("Successfully connected to smtp server: %+v", c)
-	// c.Noop()
 	if cfg.SMTP.TestAddr == "" {
 		log.Printf("No testing address. Test message won't be sent")
 		log.Printf("Email service: success")
