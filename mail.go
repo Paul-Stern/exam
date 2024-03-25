@@ -127,7 +127,7 @@ func testEmail() (err error) {
 	}
 	log.Printf("Successfully connected to smtp server: %+v", c)
 	// c.Noop()
-	if cfg.SMTP.TestAddr != "" {
+	if cfg.SMTP.TestAddr == "" {
 		log.Printf("No testing address. Test message won't be sent")
 		log.Printf("Email service: success")
 		return
