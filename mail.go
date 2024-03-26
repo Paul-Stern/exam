@@ -4,7 +4,9 @@ package main
 import (
 	"bytes"
 	"encoding/base64"
+	"errors"
 	"fmt"
+	"io"
 	"log"
 	"mime/multipart"
 	"net/http"
@@ -73,6 +75,7 @@ func (m *EmailMessage) AttachFile(src string) error {
 
 // TODO: Wrap long lines (MUST be no more than 998 and should be less 79)
 // https://datatracker.ietf.org/doc/html/rfc2822#section-2.1.1
+// TODO: Split into smaller methods
 func (m *EmailMessage) ToBytes() []byte {
 	buf := bytes.NewBuffer(nil)
 	withAttachments := len(m.Attachments) > 0
@@ -108,9 +111,27 @@ func (m *EmailMessage) ToBytes() []byte {
 			buf.WriteString("Content-Transfer-Encoding: base64\n")
 			buf.WriteString(fmt.Sprintf("Content-Disposition: attachment; filename=%s\r\n\r\n", k))
 
-			b := make([]byte, base64.StdEncoding.EncodedLen(len(v)))
-			base64.StdEncoding.Encode(b, v)
-			buf.Write(b)
+			b64 := make([]byte, base64.StdEncoding.EncodedLen(len(v)))
+			base64.StdEncoding.Encode(b64, v)
+			// Write attachment in chunks
+			b := bytes.NewBuffer(b64)
+			// Create chunk with gives size
+			chunk := make([]byte, 77)
+			for {
+				// Read a chunk
+				n, err := b.Read(chunk)
+				if err != nil {
+					if errors.Is(err, io.EOF) {
+						break
+					}
+					log.Printf("Email attachment error: %s", err)
+					break
+				}
+				// Write the chunk
+				buf.Write(chunk[:n])
+				buf.WriteString("\r\n")
+
+			}
 			buf.WriteString("\r\n")
 		}
 	}
