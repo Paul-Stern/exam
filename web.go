@@ -292,14 +292,13 @@ func resultHandler(w http.ResponseWriter, r *http.Request, sesCookie *http.Cooki
 	}
 }
 
-func logout(w http.ResponseWriter, r *http.Request) {
-	sesCookie, _ := r.Cookie("gosesid")
+func logout(w http.ResponseWriter, r *http.Request, sesCookie *http.Cookie, ses session) {
+	// sesCookie, _ := r.Cookie("gosesid")
+	log.Print("Removing session...")
 	delete(sessions, sesCookie.Value)
-	/* // Doesn't work:
-	// Remove session token cookie
-	sesCookie.MaxAge = 0
+	log.Print("Removing session cookie")
+	sesCookie.Expires = time.Now()
 	http.SetCookie(w, sesCookie)
-	*/
 	// Open login page
 	http.Redirect(w, r, "/login", http.StatusFound)
 }

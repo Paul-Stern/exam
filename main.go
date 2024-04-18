@@ -26,7 +26,7 @@ func main() {
 	http.HandleFunc("/profiles", authenticate(profilesHandler))
 	http.HandleFunc("/test", authenticate(testHandler))
 	http.HandleFunc("/result", authenticate(resultHandler))
-	http.HandleFunc("/logout", logout)
+	http.HandleFunc("/logout", authenticate(logout))
 	http.HandleFunc("/success", successHandler)
 	// paths to the cert and the key
 	log.Printf("Server started. Listening to %s:%s", cfg.Server.Addr, cfg.Server.Port)
