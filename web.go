@@ -162,9 +162,16 @@ func signInHandler(w http.ResponseWriter, r *http.Request) {
 
 		// Read credentials from form
 		c := readCreds(r.PostForm)
+		if c.Email == "" || c.Password == "" {
+			log.Print("Authentication error: Email and/or user are empty")
+			log.Print("Redirecting to login...")
+			http.Redirect(w, r, "/login", http.StatusFound)
+			return
+		}
 		// Get user by from REST server
 		u, err := getUser(c.Email)
 		if err != nil {
+			http.Redirect(w, r, "/login", http.StatusFound)
 			return
 		}
 		// Check password
