@@ -45,7 +45,7 @@
             const email = document.getElementById("field-email")
 
             if (pass.value == "") {
-                const message = "Адрес пуст"
+                const message = "Пароль пуст"
                 pass.setCustomValidity(message)
                 pass.classList.remove("is-valid")
                 pass.classList.add("is-invalid")
@@ -54,7 +54,7 @@
                 pass.classList.remove("is-invalid")
             }
             if (email.value == "") {
-                const message = "Логин пуст"
+                const message = "Адрес пуст"
                 email.setCustomValidity(message)
                 email.classList.remove("is-valid")
                 email.classList.add("is-invalid")
