@@ -220,16 +220,7 @@ func signUpHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func profilesHandler(w http.ResponseWriter, r *http.Request) {
-	// Get session id from cookie
-	sesCookie, _ := r.Cookie("gosesid")
-	ses, exists := sessions[sesCookie.Value]
-	// Redirect to login if not in session
-	if !exists {
-		http.Redirect(w, r, "/login", http.StatusFound)
-		return
-	}
-
+func profilesHandler(w http.ResponseWriter, r *http.Request, sesCookie *http.Cookie, ses session) {
 	switch r.Method {
 	case http.MethodGet:
 		var profiles Profiles
@@ -264,16 +255,7 @@ func profilesHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func resultHandler(w http.ResponseWriter, r *http.Request) {
-	// get session id from cookie
-	sesCookie, _ := r.Cookie("gosesid")
-	// get session data
-	ses, exists := sessions[sesCookie.Value]
-	// Redirect to login if not in session
-	if !exists {
-		http.Redirect(w, r, "/login", http.StatusFound)
-		return
-	}
+func resultHandler(w http.ResponseWriter, r *http.Request, sesCookie *http.Cookie, ses session) {
 	result, _ := getResult(ses.result.Id)
 	// test scenario
 	// result, _ := getResult(255)

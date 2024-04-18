@@ -23,9 +23,9 @@ func main() {
 	testEmail()
 	http.HandleFunc("/login", signInHandler)
 	http.HandleFunc("/signup", signUpHandler)
-	http.HandleFunc("/profiles", profilesHandler)
+	http.HandleFunc("/profiles", authenticate(profilesHandler))
 	http.HandleFunc("/test", authenticate(testHandler))
-	http.HandleFunc("/result", resultHandler)
+	http.HandleFunc("/result", authenticate(resultHandler))
 	http.HandleFunc("/logout", logout)
 	http.HandleFunc("/success", successHandler)
 	// paths to the cert and the key
