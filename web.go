@@ -92,17 +92,7 @@ func post(v any, url string) (*http.Response, error) {
 	return resp, err
 }
 
-func testHandler(w http.ResponseWriter, r *http.Request) {
-	// get session id from cookie
-	sesCookie, _ := r.Cookie("gosesid")
-	// get session data
-	ses, exists := sessions[sesCookie.Value]
-	// Redirect to login if not in session
-	if !exists {
-		// w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/login", http.StatusFound)
-		return
-	}
+func testHandler(w http.ResponseWriter, r *http.Request, sesCookie *http.Cookie, ses session) {
 	switch r.Method {
 	case "GET":
 		var t Test
@@ -434,4 +424,27 @@ func read[DT DataTypes](r *http.Response) (m Message[DT], err error) {
 		err = nil
 	}
 	return
+}
+
+func authenticate(fn func(http.ResponseWriter, *http.Request, *http.Cookie, session)) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Get session cookie
+		sesCookie, err := r.Cookie("gosesid")
+		if err != nil {
+			log.Printf("Authenticate error: %v (no cookie)", err)
+			log.Print("Redirecting to login page...")
+			http.Redirect(w, r, "/login", http.StatusFound)
+			return
+		}
+		// Get session by id
+		ses, exists := sessions[sesCookie.Value]
+		if !exists {
+			log.Printf("Session not exists (id: %v)", sesCookie.Value)
+			log.Print("Redirecting to login page...")
+			http.Redirect(w, r, "/login", http.StatusFound)
+			return
+		}
+		fn(w, r, sesCookie, ses)
+
+	}
 }

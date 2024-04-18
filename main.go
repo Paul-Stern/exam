@@ -24,7 +24,7 @@ func main() {
 	http.HandleFunc("/login", signInHandler)
 	http.HandleFunc("/signup", signUpHandler)
 	http.HandleFunc("/profiles", profilesHandler)
-	http.HandleFunc("/test", testHandler)
+	http.HandleFunc("/test", authenticate(testHandler))
 	http.HandleFunc("/result", resultHandler)
 	http.HandleFunc("/logout", logout)
 	http.HandleFunc("/success", successHandler)
