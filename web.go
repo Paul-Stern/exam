@@ -39,6 +39,7 @@ type Message[D DataTypes] struct {
 	Data D `json:"DATA"`
 }
 
+// map session ids to session
 var sessions = map[string]session{}
 
 var cfg Config
@@ -293,7 +294,6 @@ func resultHandler(w http.ResponseWriter, r *http.Request, sesCookie *http.Cooki
 }
 
 func logout(w http.ResponseWriter, r *http.Request, sesCookie *http.Cookie, ses session) {
-	// sesCookie, _ := r.Cookie("gosesid")
 	log.Print("Removing session...")
 	delete(sessions, sesCookie.Value)
 	log.Print("Removing session cookie")
@@ -302,11 +302,6 @@ func logout(w http.ResponseWriter, r *http.Request, sesCookie *http.Cookie, ses 
 	// Open login page
 	http.Redirect(w, r, "/login", http.StatusFound)
 }
-
-// func getSession(r *http.Request) session {
-// 	cookie, _ := r.Cookie("gosesid")
-// 	return sessions[cookie.Value]
-// }
 
 func successHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, successPage)
