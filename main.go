@@ -21,6 +21,7 @@ func main() {
 	// cert(255)
 	log.Printf("Version: %s\n", version)
 	testEmail()
+	http.HandleFunc("/", root)
 	http.HandleFunc("/login", signInHandler)
 	http.HandleFunc("/signup", signUpHandler)
 	http.HandleFunc("/profiles", authenticate(profilesHandler))

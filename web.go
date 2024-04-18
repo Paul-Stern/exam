@@ -402,6 +402,11 @@ func read[DT DataTypes](r *http.Response) (m Message[DT], err error) {
 	return
 }
 
+func root(w http.ResponseWriter, r *http.Request) {
+	log.Print("/ accessed. Redirecting to /login")
+	http.Redirect(w, r, "/login", http.StatusFound)
+}
+
 func authenticate(fn func(http.ResponseWriter, *http.Request, *http.Cookie, session)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Get session cookie
