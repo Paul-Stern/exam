@@ -171,6 +171,7 @@ func signInHandler(w http.ResponseWriter, r *http.Request) {
 		// Get user by from REST server
 		u, err := getUser(c.Email)
 		if err != nil {
+			log.Print("Login error: user not found")
 			http.Redirect(w, r, "/login", http.StatusFound)
 			return
 		}
