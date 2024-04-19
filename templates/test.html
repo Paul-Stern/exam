@@ -41,7 +41,7 @@
                     <div class="form-check mb-3">
                         <label class="form-check-label" for="option_{{$o.Id}}">
                         <input class="form-check-input" type="{{type $card}}" name="answer_on_question_{{$card.Id}}"
-                            id="option_{{$o.Id}}" value="{{$o.Id}}"> {{$o.Text}}
+                            id="option_{{$o.Id}}" value="{{$o.Id}}" required onchange="unrequire(this)"> {{$o.Text}}
                         </label>
                     </div>
                 {{end}}
@@ -55,6 +55,14 @@
             </div>
         </form>
     </div>
+    <script>
+        function unrequire(elem){
+            const ins = Array.from(document.getElementsByName(elem.name))
+            for (const i of ins) {
+                i.removeAttribute("required")
+            }
+        }
+    </script>
     <script>
         const getAttrVals = function(card) {
             return Array.from(card.getAttribute("class").split(" "));
