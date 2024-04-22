@@ -21,13 +21,15 @@
     <div class="container">
         <h6 class="text-secondary">Аттестуемый: {{getFullName .Session.User}}</h6>
         <h4 class="text-secondary">{{.Session.Profile.Text}}</h4>
-        <form action="/test" method="post" class="mb-5">
+        <div id="alertPlaceholder"></div>
+        <!-- novalidate for custom validation -->
+        <form action="/test" id="form-element" method="post" class="mb-5" novalidate>
             <input type="hidden" name="profile_id" value="{{.Session.Profile.Id}}">
             <input type="hidden" name="userId" value="{{.Session.User.Id}}">
             {{range $i, $card := .Data.Cards}}
             <div class="js-card{{if eq $i 0}} js-current{{else}} d-none{{end}} mb-5">
                 <input type="hidden" name="question_{{$card.Id}}_id" value="{{$card.Id}}">
-                <h5>Вопрос №{{inc $i}}</h5>
+                <h5 class="question-number">Вопрос №{{inc $i}}</h5>
                 <div class="fw-medium mb-1">{{$card.Question}}</div>
                 {{if $card.Appendix}}
                     <ol class="mb-2">
@@ -62,22 +64,55 @@
                 i.removeAttribute("required")
             }
         }
-        // TODO: Show a card with a list of incomplete questions
-        // TODO: Prevent default for required fields
         const getRequiredQuestions = function() {
             let els = Array.from(document.querySelectorAll("input:required"))
-            // console.log(els)
             let nums = els.map((el) => {
                 let cur = el
                 while (cur && !cur.classList.contains("js-card")) {
                     cur = cur.parentNode
                 }
-                return cur.querySelector("h5").textContent
+                return cur.querySelector(".question-number").textContent
             })
-            // console.log(nums)
             nums = nums.filter((n, pos) => nums.indexOf(n) == pos)
-            // console.log(nums)
+            return nums
         }
+        const createList = function(els) {
+            const list = document.createElement("ul")
+            const items = getRequiredQuestions()
+            for (const i of items) {
+                const li = document.createElement("li")
+                li.textContent = i
+                list.append(li)
+            }
+            return list
+        }
+        // Shows an alert with answers required
+        const showAlert = function() {
+            const placeholder = document.getElementById("alertPlaceholder")
+            const appendAlert = function(list) {
+                const wrapper = document.createElement("div")
+                wrapper.innerHTML = [
+                    '<div class="alert alert-info" role="alert">',
+                        '<div>',
+                            'Требуется ответить на следующие вопросы:',
+                            list.outerHTML,
+                        '</div>',
+                        '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
+                    '</div>'
+                ].join("")
+                placeholder.append(wrapper)
+            }
+            appendAlert(createList())
+        }
+        // Validate form
+        const form = document.getElementById("form-element")
+        form.addEventListener("submit", (event) => {
+            if (!form.checkValidity()) {
+                event.preventDefault()
+                event.stopPropagation()
+                showAlert()
+            }
+        })
     </script>
     <script>
         const getAttrVals = function(card) {
