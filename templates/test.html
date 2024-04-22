@@ -64,6 +64,20 @@
         }
         // TODO: Show a card with a list of incomplete questions
         // TODO: Prevent default for required fields
+        const getRequiredQuestions = function() {
+            let els = Array.from(document.querySelectorAll("input:required"))
+            // console.log(els)
+            let nums = els.map((el) => {
+                let cur = el
+                while (cur && !cur.classList.contains("js-card")) {
+                    cur = cur.parentNode
+                }
+                return cur.querySelector("h5").textContent
+            })
+            // console.log(nums)
+            nums = nums.filter((n, pos) => nums.indexOf(n) == pos)
+            // console.log(nums)
+        }
     </script>
     <script>
         const getAttrVals = function(card) {
